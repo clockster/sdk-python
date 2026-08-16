@@ -11,10 +11,9 @@ validated on the way in, and a refusal is raised as a `ClocksterError`.
 
 from __future__ import annotations
 
-from importlib.metadata import PackageNotFoundError, version
-
 from ._client import AsyncClockster, Clockster
-from ._transport import DEFAULT_BASE_URL
+from ._transport import DEFAULT_BASE_URL, DEFAULT_USER_AGENT
+from ._version import __version__
 from .errors import (
     AuthenticationError,
     ClocksterError,
@@ -30,6 +29,7 @@ from .webhooks import WebhookVerificationError, verify_webhook
 
 __all__ = [
     "DEFAULT_BASE_URL",
+    "DEFAULT_USER_AGENT",
     "AsyncClockster",
     "AuthenticationError",
     "Clockster",
@@ -41,12 +41,8 @@ __all__ = [
     "ServerError",
     "ValidationError",
     "WebhookVerificationError",
+    "__version__",
     "paginate",
     "paginate_async",
     "verify_webhook",
 ]
-
-try:
-    __version__ = version("clockster")
-except PackageNotFoundError:  # pragma: no cover - a source tree nobody installed
-    __version__ = "0.0.0"

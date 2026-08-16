@@ -202,3 +202,24 @@ def test_the_async_client_answers_the_same_body() -> None:
             return await clockster.users.list()
 
     assert asyncio.run(scenario()) == {"data": [{"id": 1}]}
+
+
+def test_names_this_sdk_in_the_user_agent() -> None:
+    seen: list[httpx.Request] = []
+
+    client(answer={"data": []}, seen=seen).users.list()
+
+    # So the request log says which client made a call rather than which HTTP library did.
+    assert seen[0].headers["User-Agent"].startswith("clockster-python/")
+
+
+def test_an_integration_can_name_itself_instead() -> None:
+    seen: list[httpx.Request] = []
+
+    named = Clockster(
+        "token", user_agent="acme-hr/1.4", client=stub(answer={"data": []}, seen=seen)
+    )
+
+    named.users.list()
+
+    assert seen[0].headers["User-Agent"] == "acme-hr/1.4"

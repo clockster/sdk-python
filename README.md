@@ -45,6 +45,22 @@ timesheets = clockster.timesheets.list(date_from="2026-08-01", date_to="2026-08-
 A method answers the parsed body, so rows are `response["data"]`. Nothing is validated on the way
 in: the answer is the JSON as it arrived, and a field we add tomorrow reaches your code today.
 
+## Options
+
+```python
+clockster = Clockster(
+    token,
+    base_url="https://demo.clockster.com",  # a demo stand instead of production
+    timeout=60.0,                           # seconds, applied to each request
+    user_agent="acme-hr/1.4",               # names your integration in our request log
+    client=recording,                       # your own httpx client, yours to close
+)
+```
+
+Requests carry `clockster-python/<version>` unless `user_agent` says otherwise, so our request log
+shows which client made a call. The token is read per request, so rotating it does not require a
+new client.
+
 ## Refusals
 
 A refusal is raised, never returned.
