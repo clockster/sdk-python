@@ -81,6 +81,8 @@ __all__ = [
     "PositionsUpsertBody",
     "PositionsUpsertItem",
     "PositionsUpsertResponse",
+    "Refusal",
+    "RefusalError",
     "SchedulesCreateBody",
     "SchedulesCreateResponse",
     "SchedulesCreateRow",
@@ -149,6 +151,8 @@ __all__ = [
     "UsersUpsertBody",
     "UsersUpsertResponse",
     "UsersUpsertUser",
+    "ValidationRefusal",
+    "ValidationRefusalError",
     "WebhooksCreateAuthBasic",
     "WebhooksCreateBody",
     "WebhooksCreateData",
@@ -187,6 +191,95 @@ __all__ = [
 ]
 
 
+class WorkSchedule(TypedDict):
+    type: Literal["work", "free", "leave"]
+    dates: list[str]
+    users: list[int]
+    location_id: NotRequired[int | None]
+    department_id: NotRequired[int | None]
+    position_id: NotRequired[int | None]
+    timezone: str
+    start: NotRequired[str | None]
+    end: NotRequired[str | None]
+    break_time: NotRequired[int | None]
+    grace_start: NotRequired[int | None]
+    grace_end: NotRequired[int | None]
+    shifts: NotRequired[list[WorkScheduleShift] | None]
+
+class WorkScheduleShift(TypedDict):
+    start: str
+    end: str
+    location_id: NotRequired[int | None]
+    department_id: NotRequired[int | None]
+    position_id: NotRequired[int | None]
+
+class FreeSchedule(TypedDict):
+    type: Literal["work", "free", "leave"]
+    dates: list[str]
+    users: list[int]
+    location_id: NotRequired[int | None]
+    department_id: NotRequired[int | None]
+    position_id: NotRequired[int | None]
+    timezone: str
+    start: str
+    end: str
+    time_planned: NotRequired[int | None]
+
+class LeaveSchedule(TypedDict):
+    type: Literal["work", "free", "leave"]
+    dates: list[str]
+    users: list[int]
+    location_id: NotRequired[int | None]
+    department_id: NotRequired[int | None]
+    position_id: NotRequired[int | None]
+    leave_type: Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
+
+class Refusal(TypedDict):
+    error: RefusalError
+
+class RefusalError(TypedDict):
+    code: str
+    message: str
+    request_id: str
+
+class ValidationRefusal(TypedDict):
+    error: ValidationRefusalError
+
+class ValidationRefusalError(TypedDict):
+    code: str
+    message: str
+    request_id: str
+    errors: dict[str, list[str]]
+
+class PageLinks(TypedDict):
+    first: None
+    last: None
+    prev: str | None
+    next: str | None
+
+class PageMeta(TypedDict):
+    path: str
+    per_page: int
+    next_cursor: str | None
+    prev_cursor: str | None
+
+class EmployeeShort(TypedDict):
+    id: int
+    external_id: str | None
+    code: str | None
+    first_name: str
+    middle_name: str | None
+    last_name: str
+
+class UpsertOutcome(TypedDict):
+    external_id: str | None
+    id: int
+    result: str
+
+class DeleteOutcome(TypedDict):
+    id: int
+    result: str
+
 class AttendanceListResponse(TypedDict):
     data: list[AttendanceListRow]
     links: PageLinks
@@ -207,14 +300,6 @@ class AttendanceListRow(TypedDict):
     location: NotRequired[AttendanceListRowLocation]
     attachments: NotRequired[list[AttendanceListRowAttachment]]
 
-class EmployeeShort(TypedDict):
-    id: int
-    external_id: str | None
-    code: str | None
-    first_name: str
-    middle_name: str | None
-    last_name: str
-
 class AttendanceListRowLocation(TypedDict):
     id: int
     external_id: str | None
@@ -234,18 +319,6 @@ class AttendanceListRowAttachment(TypedDict):
     format: str
     url: str
     created_at: str
-
-class PageLinks(TypedDict):
-    first: None
-    last: None
-    prev: str | None
-    next: str | None
-
-class PageMeta(TypedDict):
-    path: str
-    per_page: int
-    next_cursor: str | None
-    prev_cursor: str | None
 
 class AttendanceRecordResponse(TypedDict):
     data: list[AttendanceRecordRow]
@@ -285,11 +358,6 @@ class DepartmentsListRow(TypedDict):
 class DepartmentsUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
-class UpsertOutcome(TypedDict):
-    external_id: str | None
-    id: int
-    result: str
-
 class DepartmentsUpsertBody(TypedDict):
     items: list[DepartmentsUpsertItem]
 
@@ -312,10 +380,6 @@ class DepartmentsGetData(TypedDict):
 
 class DepartmentsDeleteResponse(TypedDict):
     data: DeleteOutcome
-
-class DeleteOutcome(TypedDict):
-    id: int
-    result: str
 
 class DocumentsListResponse(TypedDict):
     data: list[DocumentsListRow]
@@ -648,49 +712,6 @@ class SchedulesCreateRowUser(TypedDict):
 
 class SchedulesCreateBody(TypedDict):
     schedules: list[WorkSchedule | FreeSchedule | LeaveSchedule]
-
-class WorkSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
-    dates: list[str]
-    users: list[int]
-    location_id: NotRequired[int | None]
-    department_id: NotRequired[int | None]
-    position_id: NotRequired[int | None]
-    timezone: str
-    start: NotRequired[str | None]
-    end: NotRequired[str | None]
-    break_time: NotRequired[int | None]
-    grace_start: NotRequired[int | None]
-    grace_end: NotRequired[int | None]
-    shifts: NotRequired[list[WorkScheduleShift] | None]
-
-class WorkScheduleShift(TypedDict):
-    start: str
-    end: str
-    location_id: NotRequired[int | None]
-    department_id: NotRequired[int | None]
-    position_id: NotRequired[int | None]
-
-class FreeSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
-    dates: list[str]
-    users: list[int]
-    location_id: NotRequired[int | None]
-    department_id: NotRequired[int | None]
-    position_id: NotRequired[int | None]
-    timezone: str
-    start: str
-    end: str
-    time_planned: NotRequired[int | None]
-
-class LeaveSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
-    dates: list[str]
-    users: list[int]
-    location_id: NotRequired[int | None]
-    department_id: NotRequired[int | None]
-    position_id: NotRequired[int | None]
-    leave_type: Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
 
 class SchedulesGetResponse(TypedDict):
     data: SchedulesGetData

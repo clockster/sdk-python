@@ -435,6 +435,12 @@ from .models import *  # noqa: F403 - the answer types, by the names the documen
 def main() -> int:
     document = json.loads(SPEC.read_text())
     models = Models(document)
+
+    # Every component, whether or not an answer points at one: the refusal envelopes are named in
+    # the document and typed nowhere else, and a caller reading `error.errors` wants the name.
+    for component in document.get("components", {}).get("schemas", {}):
+        models.component(f"#/components/schemas/{component}")
+
     operations = [
         Operation(path, method, spec, models)
         for path, item in document["paths"].items()
