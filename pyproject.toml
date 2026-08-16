@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "clockster"
+version = "0.1.0"
+description = "Official Python SDK for the Clockster Company API"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Clockster Pte. Ltd." }]
+requires-python = ">=3.10"
+keywords = ["clockster", "sdk", "api-client", "openapi", "hr", "workforce-management", "attendance", "payroll"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+
+# httpx and nothing else. The types are annotations, which cost nothing at run time, and the
+# signing check below uses the standard library.
+dependencies = ["httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://github.com/clockster/sdk-python#readme"
+Source = "https://github.com/clockster/sdk-python"
+Issues = "https://github.com/clockster/sdk-python/issues"
+Documentation = "https://api.clockster.com/openapi/v3.json"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "mypy>=1.11,<2", "ruff>=0.6,<0.13"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clockster"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src", "tests", "scripts"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests", "scripts"]
+# Generated, and formatted by the generator that writes it. mypy still reads it.
+extend-exclude = ["src/clockster/_generated"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+

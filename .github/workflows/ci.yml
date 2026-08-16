@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  # Every branch, so work is checked before a pull request exists. Not tags: a release tag is the
+  # release workflow's, and it runs these same checks itself.
+  push:
+    branches: ['**']
+  pull_request:
+
+# Nothing here reads or writes the repository beyond checking it out.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # A pull request from this repository duplicates the push that its own branch already made;
+    # one from a fork has no such push, and is the only case the pull_request event has to cover.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - run: pip install -e ".[dev]"
+
+      - run: ruff check .
+
+      - run: ruff format --check .
+
+      - run: mypy
+
+      - run: pytest -q
+
+      # Every operation in the specification must be reachable; a name collision merges two silently.
+      - run: python scripts/check_operations.py
+
+  generated:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: pip
+
+      - run: pip install -e ".[dev]"
+
+      # The committed client must be what the committed specification produces.
+      - run: python scripts/generate.py
+
+      - run: git diff --exit-code -- src/clockster/_generated || (echo '::error::src/clockster/_generated is stale. Run `make generate`.' && exit 1)

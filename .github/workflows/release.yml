@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      # Trusted publishing: PyPI accepts this run's OIDC token instead of a stored API token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: pip
+
+      - run: pip install -e ".[dev]" build
+
+      - run: ruff check .
+
+      - run: mypy
+
+      - run: pytest -q
+
+      - run: python scripts/check_operations.py
+
+      # The tag and the manifest must agree, or the tag names a version nobody can install.
+      - name: Check the tag matches pyproject.toml
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          declared="$(python -c 'import tomllib, pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          test "$tagged" = "$declared" || { echo "::error::Tag $tagged does not match pyproject.toml $declared."; exit 1; }
+
+      - run: python -m build
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
