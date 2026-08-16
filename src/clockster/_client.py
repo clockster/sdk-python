@@ -7,7 +7,13 @@ from types import TracebackType
 import httpx
 
 from ._generated.api import _AsyncClocksterApi, _ClocksterApi
-from ._transport import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _AsyncTransport, _SyncTransport
+from ._transport import (
+    DEFAULT_BASE_URL,
+    DEFAULT_TIMEOUT,
+    DEFAULT_USER_AGENT,
+    _AsyncTransport,
+    _SyncTransport,
+)
 
 
 class Clockster(_ClocksterApi):
@@ -29,17 +35,20 @@ class Clockster(_ClocksterApi):
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        user_agent: str = DEFAULT_USER_AGENT,
         client: httpx.Client | None = None,
     ) -> None:
         """
         :param token: the company API key.
         :param base_url: point at a demo stand instead of production.
         :param timeout: seconds, applied to each request.
+        :param user_agent: name your integration in our request log, which is worth doing when
+            several talk to the same company.
         :param client: your own httpx client — a proxy, a retrying transport, a recording one.
             Supplying one leaves closing it to you.
         """
         self._sync_transport = _SyncTransport(
-            token, base_url=base_url, timeout=timeout, client=client
+            token, base_url=base_url, timeout=timeout, user_agent=user_agent, client=client
         )
 
         super().__init__(self._sync_transport)
@@ -73,10 +82,11 @@ class AsyncClockster(_AsyncClocksterApi):
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        user_agent: str = DEFAULT_USER_AGENT,
         client: httpx.AsyncClient | None = None,
     ) -> None:
         self._async_transport = _AsyncTransport(
-            token, base_url=base_url, timeout=timeout, client=client
+            token, base_url=base_url, timeout=timeout, user_agent=user_agent, client=client
         )
 
         super().__init__(self._async_transport)

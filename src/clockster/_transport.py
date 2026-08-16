@@ -10,11 +10,15 @@ from typing import IO, Any
 
 import httpx
 
+from ._version import __version__
 from .errors import STATUS_ERRORS, ClocksterError, ServerError
 
 DEFAULT_BASE_URL = "https://api.clockster.com"
 
 DEFAULT_TIMEOUT = 30.0
+
+# Sent so our request log says which client made a call rather than which HTTP library did.
+DEFAULT_USER_AGENT = f"clockster-python/{__version__}"
 
 
 def _encode(query: dict[str, Any]) -> dict[str, str]:
@@ -50,6 +54,7 @@ class _Transport:
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        user_agent: str = DEFAULT_USER_AGENT,
     ) -> None:
         if not token:
             raise ValueError("A company API key is required. Create one under Settings, API.")
@@ -57,6 +62,7 @@ class _Transport:
         self._token = token
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout
+        self._user_agent = user_agent
 
     def _build(
         self,
@@ -70,7 +76,11 @@ class _Transport:
         idempotency_key: str | None,
     ) -> dict[str, Any]:
         # Read per call rather than held in a header, so a rotated key does not need a new client.
-        headers = {"Authorization": f"Bearer {self._token}", "Accept": "application/json"}
+        headers = {
+            "Authorization": f"Bearer {self._token}",
+            "Accept": "application/json",
+            "User-Agent": self._user_agent,
+        }
 
         if idempotency_key is not None:
             headers["Idempotency-Key"] = idempotency_key
@@ -133,9 +143,10 @@ class _SyncTransport(_Transport):
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        user_agent: str = DEFAULT_USER_AGENT,
         client: httpx.Client | None = None,
     ) -> None:
-        super().__init__(token, base_url=base_url, timeout=timeout)
+        super().__init__(token, base_url=base_url, timeout=timeout, user_agent=user_agent)
         # A client supplied here is the caller's to close; one made here is closed with the SDK.
         self._owned = client is None
         self._client = client or httpx.Client(timeout=timeout)
@@ -175,9 +186,10 @@ class _AsyncTransport(_Transport):
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        user_agent: str = DEFAULT_USER_AGENT,
         client: httpx.AsyncClient | None = None,
     ) -> None:
-        super().__init__(token, base_url=base_url, timeout=timeout)
+        super().__init__(token, base_url=base_url, timeout=timeout, user_agent=user_agent)
         self._owned = client is None
         self._client = client or httpx.AsyncClient(timeout=timeout)
 
