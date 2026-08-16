@@ -45,11 +45,12 @@ testpaths = ["tests"]
 [tool.mypy]
 python_version = "3.10"
 strict = true
-files = ["src", "tests", "scripts"]
+files = ["src", "tests", "scripts", "examples"]
+mypy_path = "examples"
 
 [tool.ruff]
 line-length = 100
-src = ["src", "tests", "scripts"]
+src = ["src", "tests", "scripts", "examples"]
 # Generated, and formatted by the generator that writes it. mypy still reads it.
 extend-exclude = ["src/clockster/_generated"]
 

@@ -191,6 +191,12 @@ Deliveries older than five minutes are refused as replays; `tolerance_seconds` c
 Semver, independent of the API version. This package targets Company API v3; a new API version is a
 major release here, not a second package.
 
+## Examples
+
+Two integrations of the shape most of them have, in [examples](examples): `roster_sync.py` writes a
+roster in from a CSV and dismisses whoever is no longer in it, `timesheet_export.py` reads a month
+out as CSV. Both are single files that use the package as published.
+
 ## Development
 
 `src/clockster/_generated` is produced from `openapi/company-v3.json` and committed, so an API
