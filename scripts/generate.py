@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import keyword
 import re
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,49 @@ OVERRIDES = {
 }
 
 SCALARS = {"string": "str", "integer": "int", "number": "float", "boolean": "bool", "null": "None"}
+
+
+def enum_values(schema: dict[str, Any], declared: str) -> list[Any] | None:
+    """The values of a set the document states coherently, and None where it does not.
+
+    Coherent means the values are of the type declared beside them. A document saying
+    `{"type": "integer", "enum": ["0", "1"]}` disagrees with itself, and a client that picks a side
+    bakes the disagreement into everybody's type checking — so that one is left as the bare type
+    rather than guessed at.
+    """
+    values = schema.get("enum")
+
+    if not values:
+        return None
+
+    holds: dict[str, type] = {"string": str, "integer": int, "number": float}
+    wanted = holds.get(declared)
+
+    if wanted is None:
+        return None
+
+    # A whole number written without a point is an int to JSON and a float to the document.
+    if wanted is float:
+        numeric = all(type(value) in (int, float) for value in values)
+
+        return list(values) if numeric else None
+
+    return list(values) if all(type(value) is wanted for value in values) else None
+
+
+def described(schema: dict[str, Any], indent: str) -> list[str]:
+    """What the document says a field is, as the comment above it.
+
+    A TypedDict member carries no docstring of its own, so a comment is where a description can go.
+    It is the same place the Go client puts one, and it is where jumping to the definition of a body
+    lands somebody who wants to know what a field means.
+    """
+    prose = (schema.get("description") or "").strip()
+
+    if not prose:
+        return []
+
+    return [f"{indent}# {line}" for line in textwrap.wrap(prose, 100 - len(indent) - 2)]
 
 
 def snake(name: str) -> str:
@@ -118,8 +162,10 @@ class Models:
         if declared == "object":
             return self.object_type(schema, hint)
 
-        if declared == "string" and schema.get("enum"):
-            return "Literal[" + ", ".join(json.dumps(value) for value in schema["enum"]) + "]"
+        values = enum_values(schema, declared)
+
+        if values is not None:
+            return "Literal[" + ", ".join(json.dumps(value) for value in values) + "]"
 
         return SCALARS[declared]
 
@@ -183,7 +229,10 @@ class Models:
             return f'{name} = TypedDict("{name}", {{{entries}}})\n'
 
         lines = [f"class {name}(TypedDict):"]
-        lines.extend(f"    {key}: {annotation}" for key, annotation in fields.items())
+
+        for key, annotation in fields.items():
+            lines.extend(described(properties[key], "    "))
+            lines.append(f"    {key}: {annotation}")
 
         return "\n".join(lines) + "\n"
 
