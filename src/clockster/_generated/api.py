@@ -15,7 +15,7 @@ from .models import *  # noqa: F403 - the answer types, by the names the documen
 class PayrollPayslips(_Namespace):
     """`clockster.payroll.payslips`."""
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, statuses: list[Literal["draft", "approved", "paid"]] | None = None, months: list[str] | None = None, updated_since: str | None = None) -> PayrollPayslipsListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, statuses: list[PayrollPayslipsStatus] | None = None, months: list[str] | None = None, updated_since: str | None = None) -> PayrollPayslipsListResponse:
         """List payslips
 
         Reading only. Nothing on this surface creates or changes a payslip.
@@ -68,7 +68,7 @@ class WebhooksDeliveries(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, webhooks: list[int] | None = None, events: list[Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]] | None = None, successful: bool | None = None, pending: bool | None = None, since: str | None = None, include: list[Literal["payload"]] | None = None) -> WebhooksDeliveriesListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, webhooks: list[int] | None = None, events: list[WebhooksEvent] | None = None, successful: bool | None = None, pending: bool | None = None, since: str | None = None, include: list[WebhooksDeliveriesInclude] | None = None) -> WebhooksDeliveriesListResponse:
         """List webhook deliveries
 
         What was sent, and what came of it. **Newest first**, unlike every other listing here: a
@@ -136,7 +136,7 @@ class WebhooksEvents(_Namespace):
 class Attendance(_Namespace):
     """`clockster.attendance`."""
 
-    def list(self, *, date_from: str | None = None, date_to: str | None = None, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, statuses: list[Literal["out", "in", "break"]] | None = None, sources: list[Literal["device", "mobile", "frontend", "api", "system"]] | None = None, include: list[Literal["user", "location", "attachments"]] | None = None) -> AttendanceListResponse:
+    def list(self, *, date_from: str | None = None, date_to: str | None = None, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, statuses: list[AttendanceStatus] | None = None, sources: list[AttendanceSource] | None = None, include: list[AttendanceInclude] | None = None) -> AttendanceListResponse:
         """List clock-ins
 
         Marks inside a window of days, oldest first.
@@ -222,7 +222,7 @@ class Departments(_Namespace):
             ),
         )
 
-    def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> DepartmentsGetResponse:
+    def get(self, id: int, *, include: list[DepartmentsInclude] | None = None) -> DepartmentsGetResponse:
         """Read one department
 
         The same keys and the same `include` vocabulary as the listing — `include=managers` adds the managers. Somebody else's id is a `404`.
@@ -236,7 +236,7 @@ class Departments(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[Literal["managers"]] | None = None) -> DepartmentsListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[DepartmentsInclude] | None = None) -> DepartmentsListResponse:
         """List departments
 
         `include=managers` adds the managers. Without it the key is absent, never null standing in for "not asked for".
@@ -288,7 +288,7 @@ class Documents(_Namespace):
             ),
         )
 
-    def get(self, id: int, *, include: list[Literal["attachments", "signers", "labor_contract"]] | None = None) -> DocumentsGetResponse:
+    def get(self, id: int, *, include: list[DocumentsInclude] | None = None) -> DocumentsGetResponse:
         """Read one document
 
         The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
@@ -302,7 +302,7 @@ class Documents(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, party: Literal["employee", "counterparty"] | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, types: list[Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier"]] | None = None, employment_types: list[Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"]] | None = None, search: str | None = None, updated_since: str | None = None, expires_after: str | None = None, expires_before: str | None = None, effective_from: str | None = None, effective_to: str | None = None, include: list[Literal["attachments", "signers", "labor_contract"]] | None = None) -> DocumentsListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, party: DocumentsParty | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, types: list[DocumentsType] | None = None, employment_types: list[DocumentsEmploymentType] | None = None, search: str | None = None, updated_since: str | None = None, expires_after: str | None = None, expires_before: str | None = None, effective_from: str | None = None, effective_to: str | None = None, include: list[DocumentsInclude] | None = None) -> DocumentsListResponse:
         """List documents
 
         The company's paperwork, oldest first, paged on a cursor.
@@ -445,7 +445,7 @@ class Locations(_Namespace):
             ),
         )
 
-    def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> LocationsGetResponse:
+    def get(self, id: int, *, include: list[LocationsInclude] | None = None) -> LocationsGetResponse:
         """Read one location
 
         The same keys the listing answers with. Somebody else's id is a `404`, where asking the listing for it answers `200` with an empty array and leaves you counting.
@@ -459,7 +459,7 @@ class Locations(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, include: list[Literal["managers"]] | None = None, codes: list[str] | None = None, updated_since: str | None = None) -> LocationsListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, include: list[LocationsInclude] | None = None, codes: list[str] | None = None, updated_since: str | None = None) -> LocationsListResponse:
         """List locations
 
         Ordered by `id` and paged on a cursor: no page number, no total, and nothing repeated
@@ -680,7 +680,7 @@ class Schedules(_Namespace):
 class Tasks(_Namespace):
     """`clockster.tasks`."""
 
-    def get(self, id: int, *, include: list[Literal["items", "managers", "user", "author"]] | None = None) -> TasksGetResponse:
+    def get(self, id: int, *, include: list[TasksInclude] | None = None) -> TasksGetResponse:
         """Read one task
 
         The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
@@ -694,7 +694,7 @@ class Tasks(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, categories: list[int] | None = None, statuses: list[Literal["created", "started", "paused", "completed", "incompleted", "pastdue"]] | None = None, active: bool | None = None, search: str | None = None, due_from: str | None = None, due_to: str | None = None, updated_since: str | None = None, include: list[Literal["items", "managers", "user", "author"]] | None = None) -> TasksListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, categories: list[int] | None = None, statuses: list[TasksStatus] | None = None, active: bool | None = None, search: str | None = None, due_from: str | None = None, due_to: str | None = None, updated_since: str | None = None, include: list[TasksInclude] | None = None) -> TasksListResponse:
         """List tasks
 
         Work as we hold it: what was issued, what became of it, and how it measured up.
@@ -775,7 +775,7 @@ class Tasks(_Namespace):
 class Timesheets(_Namespace):
     """`clockster.timesheets`."""
 
-    def list(self, *, date_from: str | None = None, date_to: str | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, employment: str | None = None, include: list[Literal["actual", "variance", "user", "location", "department", "position"]] | None = None) -> TimesheetsListResponse:
+    def list(self, *, date_from: str | None = None, date_to: str | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, employment: str | None = None, include: list[TimesheetsInclude] | None = None) -> TimesheetsListResponse:
         """Timesheets
 
         One row per person per calendar day of the window: what was planned, and — when asked
@@ -835,7 +835,7 @@ class UserFilters(_Namespace):
             ),
         )
 
-    def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> UserFiltersGetResponse:
+    def get(self, id: int, *, include: list[UserFiltersInclude] | None = None) -> UserFiltersGetResponse:
         """Read one user filter
 
         The same keys and the same `include` vocabulary as the listing. Somebody else's id is a `404`.
@@ -849,7 +849,7 @@ class UserFilters(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[Literal["managers"]] | None = None) -> UserFiltersListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[UserFiltersInclude] | None = None) -> UserFiltersListResponse:
         """List user filters
 
         `include=managers` adds the managers, as on departments.
@@ -897,7 +897,7 @@ class UserRequests(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, types: list[Literal["leave", "work", "general", "finance"]] | None = None, statuses: list[Literal["pending", "accepted", "rejected", "cancelled", "approval", "execution", "signing"]] | None = None, subtypes: list[str] | None = None, users: list[int] | None = None, updated_since: str | None = None, include: list[Literal["content", "user", "author"]] | None = None) -> UserRequestsListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, types: list[UserRequestsType] | None = None, statuses: list[UserRequestsStatus] | None = None, subtypes: list[str] | None = None, users: list[int] | None = None, updated_since: str | None = None, include: list[UserRequestsInclude] | None = None) -> UserRequestsListResponse:
         """List requests
 
         What people asked for, and what became of it — leave, schedule changes, corrections and
@@ -990,7 +990,7 @@ class Users(_Namespace):
             ),
         )
 
-    def get(self, id: int, *, include: list[Literal["location", "locations", "department", "position", "user_filters", "dismissal", "meta"]] | None = None) -> UsersGetResponse:
+    def get(self, id: int, *, include: list[UsersInclude] | None = None) -> UsersGetResponse:
         """Read one employee
 
         One employee by our id. Prefer it over `?ids=` when you expect exactly one: someone who
@@ -1008,7 +1008,7 @@ class Users(_Namespace):
             ),
         )
 
-    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, status: Literal["active", "dismissed", "all"] | None = None, ids: list[int] | None = None, codes: list[str] | None = None, external_ids: list[str] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, employment: list[str] | None = None, include: list[Literal["location", "locations", "department", "position", "user_filters", "dismissal", "meta"]] | None = None) -> UsersListResponse:
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, status: UsersStatus | None = None, ids: list[int] | None = None, codes: list[str] | None = None, external_ids: list[str] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, employment: list[UsersEmployment] | None = None, include: list[UsersInclude] | None = None) -> UsersListResponse:
         """List employees
 
         The roster as we hold it. Every scalar is always present; a relation appears only when
@@ -1219,7 +1219,7 @@ class _ClocksterApi(_Namespace):
 class AsyncPayrollPayslips(_AsyncNamespace):
     """`clockster.payroll.payslips`."""
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, statuses: list[Literal["draft", "approved", "paid"]] | None = None, months: list[str] | None = None, updated_since: str | None = None) -> PayrollPayslipsListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, statuses: list[PayrollPayslipsStatus] | None = None, months: list[str] | None = None, updated_since: str | None = None) -> PayrollPayslipsListResponse:
         """List payslips
 
         Reading only. Nothing on this surface creates or changes a payslip.
@@ -1272,7 +1272,7 @@ class AsyncWebhooksDeliveries(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, webhooks: list[int] | None = None, events: list[Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]] | None = None, successful: bool | None = None, pending: bool | None = None, since: str | None = None, include: list[Literal["payload"]] | None = None) -> WebhooksDeliveriesListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, webhooks: list[int] | None = None, events: list[WebhooksEvent] | None = None, successful: bool | None = None, pending: bool | None = None, since: str | None = None, include: list[WebhooksDeliveriesInclude] | None = None) -> WebhooksDeliveriesListResponse:
         """List webhook deliveries
 
         What was sent, and what came of it. **Newest first**, unlike every other listing here: a
@@ -1340,7 +1340,7 @@ class AsyncWebhooksEvents(_AsyncNamespace):
 class AsyncAttendance(_AsyncNamespace):
     """`clockster.attendance`."""
 
-    async def list(self, *, date_from: str | None = None, date_to: str | None = None, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, statuses: list[Literal["out", "in", "break"]] | None = None, sources: list[Literal["device", "mobile", "frontend", "api", "system"]] | None = None, include: list[Literal["user", "location", "attachments"]] | None = None) -> AttendanceListResponse:
+    async def list(self, *, date_from: str | None = None, date_to: str | None = None, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, statuses: list[AttendanceStatus] | None = None, sources: list[AttendanceSource] | None = None, include: list[AttendanceInclude] | None = None) -> AttendanceListResponse:
         """List clock-ins
 
         Marks inside a window of days, oldest first.
@@ -1426,7 +1426,7 @@ class AsyncDepartments(_AsyncNamespace):
             ),
         )
 
-    async def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> DepartmentsGetResponse:
+    async def get(self, id: int, *, include: list[DepartmentsInclude] | None = None) -> DepartmentsGetResponse:
         """Read one department
 
         The same keys and the same `include` vocabulary as the listing — `include=managers` adds the managers. Somebody else's id is a `404`.
@@ -1440,7 +1440,7 @@ class AsyncDepartments(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[Literal["managers"]] | None = None) -> DepartmentsListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[DepartmentsInclude] | None = None) -> DepartmentsListResponse:
         """List departments
 
         `include=managers` adds the managers. Without it the key is absent, never null standing in for "not asked for".
@@ -1492,7 +1492,7 @@ class AsyncDocuments(_AsyncNamespace):
             ),
         )
 
-    async def get(self, id: int, *, include: list[Literal["attachments", "signers", "labor_contract"]] | None = None) -> DocumentsGetResponse:
+    async def get(self, id: int, *, include: list[DocumentsInclude] | None = None) -> DocumentsGetResponse:
         """Read one document
 
         The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
@@ -1506,7 +1506,7 @@ class AsyncDocuments(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, party: Literal["employee", "counterparty"] | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, types: list[Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier"]] | None = None, employment_types: list[Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"]] | None = None, search: str | None = None, updated_since: str | None = None, expires_after: str | None = None, expires_before: str | None = None, effective_from: str | None = None, effective_to: str | None = None, include: list[Literal["attachments", "signers", "labor_contract"]] | None = None) -> DocumentsListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, party: DocumentsParty | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, types: list[DocumentsType] | None = None, employment_types: list[DocumentsEmploymentType] | None = None, search: str | None = None, updated_since: str | None = None, expires_after: str | None = None, expires_before: str | None = None, effective_from: str | None = None, effective_to: str | None = None, include: list[DocumentsInclude] | None = None) -> DocumentsListResponse:
         """List documents
 
         The company's paperwork, oldest first, paged on a cursor.
@@ -1649,7 +1649,7 @@ class AsyncLocations(_AsyncNamespace):
             ),
         )
 
-    async def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> LocationsGetResponse:
+    async def get(self, id: int, *, include: list[LocationsInclude] | None = None) -> LocationsGetResponse:
         """Read one location
 
         The same keys the listing answers with. Somebody else's id is a `404`, where asking the listing for it answers `200` with an empty array and leaves you counting.
@@ -1663,7 +1663,7 @@ class AsyncLocations(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, include: list[Literal["managers"]] | None = None, codes: list[str] | None = None, updated_since: str | None = None) -> LocationsListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, include: list[LocationsInclude] | None = None, codes: list[str] | None = None, updated_since: str | None = None) -> LocationsListResponse:
         """List locations
 
         Ordered by `id` and paged on a cursor: no page number, no total, and nothing repeated
@@ -1884,7 +1884,7 @@ class AsyncSchedules(_AsyncNamespace):
 class AsyncTasks(_AsyncNamespace):
     """`clockster.tasks`."""
 
-    async def get(self, id: int, *, include: list[Literal["items", "managers", "user", "author"]] | None = None) -> TasksGetResponse:
+    async def get(self, id: int, *, include: list[TasksInclude] | None = None) -> TasksGetResponse:
         """Read one task
 
         The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
@@ -1898,7 +1898,7 @@ class AsyncTasks(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, categories: list[int] | None = None, statuses: list[Literal["created", "started", "paused", "completed", "incompleted", "pastdue"]] | None = None, active: bool | None = None, search: str | None = None, due_from: str | None = None, due_to: str | None = None, updated_since: str | None = None, include: list[Literal["items", "managers", "user", "author"]] | None = None) -> TasksListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, users: list[int] | None = None, categories: list[int] | None = None, statuses: list[TasksStatus] | None = None, active: bool | None = None, search: str | None = None, due_from: str | None = None, due_to: str | None = None, updated_since: str | None = None, include: list[TasksInclude] | None = None) -> TasksListResponse:
         """List tasks
 
         Work as we hold it: what was issued, what became of it, and how it measured up.
@@ -1979,7 +1979,7 @@ class AsyncTasks(_AsyncNamespace):
 class AsyncTimesheets(_AsyncNamespace):
     """`clockster.timesheets`."""
 
-    async def list(self, *, date_from: str | None = None, date_to: str | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, employment: str | None = None, include: list[Literal["actual", "variance", "user", "location", "department", "position"]] | None = None) -> TimesheetsListResponse:
+    async def list(self, *, date_from: str | None = None, date_to: str | None = None, cursor: str | None = None, users: list[int] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, employment: str | None = None, include: list[TimesheetsInclude] | None = None) -> TimesheetsListResponse:
         """Timesheets
 
         One row per person per calendar day of the window: what was planned, and — when asked
@@ -2039,7 +2039,7 @@ class AsyncUserFilters(_AsyncNamespace):
             ),
         )
 
-    async def get(self, id: int, *, include: list[Literal["managers"]] | None = None) -> UserFiltersGetResponse:
+    async def get(self, id: int, *, include: list[UserFiltersInclude] | None = None) -> UserFiltersGetResponse:
         """Read one user filter
 
         The same keys and the same `include` vocabulary as the listing. Somebody else's id is a `404`.
@@ -2053,7 +2053,7 @@ class AsyncUserFilters(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[Literal["managers"]] | None = None) -> UserFiltersListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, include: list[UserFiltersInclude] | None = None) -> UserFiltersListResponse:
         """List user filters
 
         `include=managers` adds the managers, as on departments.
@@ -2101,7 +2101,7 @@ class AsyncUserRequests(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, types: list[Literal["leave", "work", "general", "finance"]] | None = None, statuses: list[Literal["pending", "accepted", "rejected", "cancelled", "approval", "execution", "signing"]] | None = None, subtypes: list[str] | None = None, users: list[int] | None = None, updated_since: str | None = None, include: list[Literal["content", "user", "author"]] | None = None) -> UserRequestsListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, types: list[UserRequestsType] | None = None, statuses: list[UserRequestsStatus] | None = None, subtypes: list[str] | None = None, users: list[int] | None = None, updated_since: str | None = None, include: list[UserRequestsInclude] | None = None) -> UserRequestsListResponse:
         """List requests
 
         What people asked for, and what became of it — leave, schedule changes, corrections and
@@ -2194,7 +2194,7 @@ class AsyncUsers(_AsyncNamespace):
             ),
         )
 
-    async def get(self, id: int, *, include: list[Literal["location", "locations", "department", "position", "user_filters", "dismissal", "meta"]] | None = None) -> UsersGetResponse:
+    async def get(self, id: int, *, include: list[UsersInclude] | None = None) -> UsersGetResponse:
         """Read one employee
 
         One employee by our id. Prefer it over `?ids=` when you expect exactly one: someone who
@@ -2212,7 +2212,7 @@ class AsyncUsers(_AsyncNamespace):
             ),
         )
 
-    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, status: Literal["active", "dismissed", "all"] | None = None, ids: list[int] | None = None, codes: list[str] | None = None, external_ids: list[str] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, employment: list[str] | None = None, include: list[Literal["location", "locations", "department", "position", "user_filters", "dismissal", "meta"]] | None = None) -> UsersListResponse:
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, search: str | None = None, updated_since: str | None = None, status: UsersStatus | None = None, ids: list[int] | None = None, codes: list[str] | None = None, external_ids: list[str] | None = None, locations: list[int] | None = None, departments: list[int] | None = None, positions: list[int] | None = None, user_filters: list[int] | None = None, employment: list[UsersEmployment] | None = None, include: list[UsersInclude] | None = None) -> UsersListResponse:
         """List employees
 
         The roster as we hold it. Every scalar is always present; a relation appears only when

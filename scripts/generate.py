@@ -119,6 +119,9 @@ class Models:
     def __init__(self, document: dict[str, Any]) -> None:
         self.document = document
         self.blocks: dict[str, str] = {}
+        # The closed sets of values, by the name the document gives each. Written as aliases ahead
+        # of the shapes that reference them, so a twenty-seven-value union is spelled once.
+        self.sets: dict[str, str] = {}
         # One operation's shapes, so the same object under two keys of one answer is named once.
         self.scope = ""
         self.shapes: dict[tuple[str, str], str] = {}
@@ -165,9 +168,32 @@ class Models:
         values = enum_values(schema, declared)
 
         if values is not None:
-            return "Literal[" + ", ".join(json.dumps(value) for value in values) + "]"
+            return self.set_type(schema, values)
 
         return SCALARS[declared]
+
+    def set_type(self, schema: dict[str, Any], values: list[Any]) -> str:
+        """A set of values, under the name the document gives it.
+
+        The name is read rather than worked out: deriving one would mean the same rule in four
+        languages kept in step forever, and the document carries it instead. A `Literal` needs no
+        constants beside it — the alias is what a caller completes against, and `get_args()` answers
+        with the values where a check against a file or a dropdown wants them.
+        """
+        literal = "Literal[" + ", ".join(json.dumps(value) for value in values) + "]"
+        name = schema.get("x-clockster-set")
+
+        if not isinstance(name, str):
+            return literal
+
+        held = self.sets.setdefault(name, literal)
+
+        # One name over two different sets would have a caller completing against one and checked
+        # against the other. The document has a test against this; so does this.
+        if held != literal:
+            raise SystemExit(f"{name} names two different sets of values: {held} and {literal}.")
+
+        return name
 
     def object_type(self, schema: dict[str, Any], hint: str) -> str:
         if "properties" in schema:
@@ -265,8 +291,9 @@ if TYPE_CHECKING:
 
 '''
 
-        names = ",\n".join(f'    "{name}"' for name in sorted(self.blocks))
-        body = "\n\n".join(block.rstrip() for block in self.blocks.values())
+        names = ",\n".join(f'    "{name}"' for name in sorted({**self.sets, **self.blocks}))
+        aliases = [f"{name} = {self.sets[name]}" for name in sorted(self.sets)]
+        body = "\n\n".join([*aliases, *(block.rstrip() for block in self.blocks.values())])
 
         return f"{head}__all__ = [\n{names},\n]\n\n\n{body}\n"
 
@@ -497,12 +524,16 @@ def main() -> int:
     ]
     operations.sort(key=lambda operation: (operation.namespace, operation.name))
 
+    # Rendered before models.py is written, not after: a set carried only by a query parameter is
+    # met while the signatures are built, and models.py has to be able to name it.
+    api = render_api(operations, models)
+
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "__init__.py").write_text(
         '"""Generated from the specification; do not edit by hand."""\n'
     )
     (OUT / "models.py").write_text(models.source())
-    (OUT / "api.py").write_text(render_api(operations, models))
+    (OUT / "api.py").write_text(api)
 
     print(f"{len(operations)} operations, {len(models.blocks)} shapes.")
 

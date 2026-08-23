@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
 __all__ = [
+    "AttendanceInclude",
     "AttendanceListResponse",
     "AttendanceListRow",
     "AttendanceListRowAttachment",
@@ -23,28 +24,35 @@ __all__ = [
     "AttendanceRecordBody",
     "AttendanceRecordResponse",
     "AttendanceRecordRow",
+    "AttendanceSource",
+    "AttendanceStatus",
     "DeleteOutcome",
     "DepartmentsDeleteResponse",
     "DepartmentsGetData",
     "DepartmentsGetResponse",
+    "DepartmentsInclude",
     "DepartmentsListResponse",
     "DepartmentsListRow",
     "DepartmentsUpsertBody",
     "DepartmentsUpsertItem",
     "DepartmentsUpsertResponse",
     "DocumentsDeleteResponse",
+    "DocumentsEmploymentType",
     "DocumentsGetData",
     "DocumentsGetDataAttachment",
     "DocumentsGetDataLaborContract",
     "DocumentsGetDataSignature",
     "DocumentsGetDataSigner",
     "DocumentsGetResponse",
+    "DocumentsInclude",
     "DocumentsListResponse",
     "DocumentsListRow",
     "DocumentsListRowAttachment",
     "DocumentsListRowLaborContract",
     "DocumentsListRowSignature",
     "DocumentsListRowSigner",
+    "DocumentsParty",
+    "DocumentsType",
     "DocumentsUpsertBody",
     "DocumentsUpsertDocument",
     "DocumentsUpsertResponse",
@@ -56,6 +64,7 @@ __all__ = [
     "LocationsDeleteResponse",
     "LocationsGetData",
     "LocationsGetResponse",
+    "LocationsInclude",
     "LocationsListResponse",
     "LocationsListRow",
     "LocationsUpsertBody",
@@ -73,6 +82,7 @@ __all__ = [
     "PayrollPayslipsListRowPeriod",
     "PayrollPayslipsListRowSalary",
     "PayrollPayslipsListRowUser",
+    "PayrollPayslipsStatus",
     "PositionsDeleteResponse",
     "PositionsGetData",
     "PositionsGetResponse",
@@ -93,17 +103,23 @@ __all__ = [
     "SchedulesGetDataShift",
     "SchedulesGetDataUser",
     "SchedulesGetResponse",
+    "SchedulesLeaveType",
+    "SchedulesType",
     "TasksGetData",
     "TasksGetDataItem",
     "TasksGetResponse",
+    "TasksInclude",
     "TasksListMeta",
     "TasksListResponse",
     "TasksListRow",
     "TasksListRowItem",
+    "TasksPriority",
+    "TasksStatus",
     "TasksUpsertBody",
     "TasksUpsertResponse",
     "TasksUpsertTask",
     "TasksUpsertTaskItem",
+    "TimesheetsInclude",
     "TimesheetsListMeta",
     "TimesheetsListResponse",
     "TimesheetsListRow",
@@ -118,6 +134,7 @@ __all__ = [
     "UserFiltersDeleteResponse",
     "UserFiltersGetData",
     "UserFiltersGetResponse",
+    "UserFiltersInclude",
     "UserFiltersListResponse",
     "UserFiltersListRow",
     "UserFiltersUpsertBody",
@@ -128,26 +145,35 @@ __all__ = [
     "UserRequestsGetDataContentClockin",
     "UserRequestsGetDataPeriod",
     "UserRequestsGetResponse",
+    "UserRequestsInclude",
     "UserRequestsListResponse",
     "UserRequestsListRow",
     "UserRequestsListRowContent",
     "UserRequestsListRowContentClockin",
     "UserRequestsListRowPeriod",
+    "UserRequestsStatus",
+    "UserRequestsType",
     "UsersDismissBody",
     "UsersDismissResponse",
     "UsersDismissUser",
+    "UsersEmployment",
+    "UsersGender",
     "UsersGetData",
     "UsersGetDataDepartment",
     "UsersGetDataDismissal",
     "UsersGetDataLocation",
     "UsersGetDataMeta",
     "UsersGetResponse",
+    "UsersInclude",
     "UsersListResponse",
     "UsersListRow",
     "UsersListRowDepartment",
     "UsersListRowDismissal",
     "UsersListRowLocation",
     "UsersListRowMeta",
+    "UsersLocale",
+    "UsersRole",
+    "UsersStatus",
     "UsersUpsertBody",
     "UsersUpsertResponse",
     "UsersUpsertUser",
@@ -163,10 +189,12 @@ __all__ = [
     "WebhooksDeliveriesGetData",
     "WebhooksDeliveriesGetDataPayload",
     "WebhooksDeliveriesGetResponse",
+    "WebhooksDeliveriesInclude",
     "WebhooksDeliveriesListResponse",
     "WebhooksDeliveriesListRow",
     "WebhooksDeliveriesListRowPayload",
     "WebhooksDeliveriesRedeliverResponse",
+    "WebhooksEvent",
     "WebhooksEventsListResponse",
     "WebhooksGetData",
     "WebhooksGetDataAuth",
@@ -191,48 +219,142 @@ __all__ = [
 ]
 
 
+AttendanceInclude = Literal["user", "location", "attachments"]
+
+AttendanceSource = Literal["device", "mobile", "frontend", "api", "system"]
+
+AttendanceStatus = Literal["out", "in", "break"]
+
+DepartmentsInclude = Literal["managers"]
+
+DocumentsEmploymentType = Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"]
+
+DocumentsInclude = Literal["attachments", "signers", "labor_contract"]
+
+DocumentsParty = Literal["employee", "counterparty"]
+
+DocumentsType = Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier"]
+
+LocationsInclude = Literal["managers"]
+
+PayrollPayslipsStatus = Literal["draft", "approved", "paid"]
+
+SchedulesLeaveType = Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
+
+SchedulesType = Literal["work", "free", "leave"]
+
+TasksInclude = Literal["items", "managers", "user", "author"]
+
+TasksPriority = Literal[0, 1]
+
+TasksStatus = Literal["created", "started", "paused", "completed", "incompleted", "pastdue"]
+
+TimesheetsInclude = Literal["actual", "variance", "user", "location", "department", "position"]
+
+UserFiltersInclude = Literal["managers"]
+
+UserRequestsInclude = Literal["content", "user", "author"]
+
+UserRequestsStatus = Literal["pending", "accepted", "rejected", "cancelled", "approval", "execution", "signing"]
+
+UserRequestsType = Literal["leave", "work", "general", "finance"]
+
+UsersEmployment = Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"]
+
+UsersGender = Literal["male", "female", "other"]
+
+UsersInclude = Literal["location", "locations", "department", "position", "user_filters", "dismissal", "meta"]
+
+UsersLocale = Literal["en", "ru", "kk", "uk", "id", "uz", "az", "fr", "vi", "zh"]
+
+UsersRole = Literal["admin", "employee"]
+
+UsersStatus = Literal["active", "dismissed", "all"]
+
+WebhooksDeliveriesInclude = Literal["payload"]
+
+WebhooksEvent = Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]
+
 class WorkSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
+    # Which kind of day this is, and with it what else the item requires.
+    type: SchedulesType
+    # The days this applies to, each `YYYY-MM-DD`. No repeats.
     dates: list[str]
+    # Who the day is for, by id. At least one, and no repeats.
     users: list[int]
+    # The location this is filed against, by id. Null clears it.
     location_id: NotRequired[int | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
+    # The UTC offset the clock times beside it are read in — `Z`, or `+05:00`. An offset rather than
+    # a zone name, so the day is fixed to a moment rather than to a rule that may be changed later.
     timezone: str
+    # When it starts, as a clock time `HH:MM:SS`, read in the offset beside it.
     start: NotRequired[str | None]
+    # When it ends, as a clock time `HH:MM:SS`, read in the offset beside it.
     end: NotRequired[str | None]
+    # Unpaid break within the day, in seconds.
     break_time: NotRequired[int | None]
+    # How late an arrival still counts as on time, in seconds.
     grace_start: NotRequired[int | None]
+    # How early a departure still counts as a full day, in seconds.
     grace_end: NotRequired[int | None]
+    # Split the day into shifts instead of one span. Each carries its own clock times and may sit
+    # somewhere other than the day does.
     shifts: NotRequired[list[WorkScheduleShift] | None]
 
 class WorkScheduleShift(TypedDict):
+    # When it starts, as a clock time `HH:MM:SS`, read in the offset beside it.
     start: str
+    # When it ends, as a clock time `HH:MM:SS`, read in the offset beside it.
     end: str
+    # The location this is filed against, by id. Null clears it.
     location_id: NotRequired[int | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
 
 class FreeSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
+    # Which kind of day this is, and with it what else the item requires.
+    type: SchedulesType
+    # The days this applies to, each `YYYY-MM-DD`. No repeats.
     dates: list[str]
+    # Who the day is for, by id. At least one, and no repeats.
     users: list[int]
+    # The location this is filed against, by id. Null clears it.
     location_id: NotRequired[int | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
+    # The UTC offset the clock times beside it are read in — `Z`, or `+05:00`. An offset rather than
+    # a zone name, so the day is fixed to a moment rather than to a rule that may be changed later.
     timezone: str
+    # When it starts, as a clock time `HH:MM:SS`, read in the offset beside it.
     start: str
+    # When it ends, as a clock time `HH:MM:SS`, read in the offset beside it.
     end: str
+    # How long the person is expected to work that day, in seconds.
     time_planned: NotRequired[int | None]
 
 class LeaveSchedule(TypedDict):
-    type: Literal["work", "free", "leave"]
+    # Which kind of day this is, and with it what else the item requires.
+    type: SchedulesType
+    # The days this applies to, each `YYYY-MM-DD`. No repeats.
     dates: list[str]
+    # Who the day is for, by id. At least one, and no repeats.
     users: list[int]
+    # The location this is filed against, by id. Null clears it.
     location_id: NotRequired[int | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
-    leave_type: Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
+    # What kind of leave the day is.
+    leave_type: SchedulesLeaveType
 
 class Refusal(TypedDict):
     error: RefusalError
@@ -331,14 +453,22 @@ class AttendanceRecordRow(TypedDict):
     result: str
 
 class AttendanceRecordBody(TypedDict):
+    # The marks to record, up to 100 a call.
     attendance: list[AttendanceRecordAttendanceItem]
 
 class AttendanceRecordAttendanceItem(TypedDict):
+    # The employee this belongs to, by the id this API issued.
     user_id: int
+    # Where the mark was made, by id.
     location_id: NotRequired[int | None]
+    # The shift this mark belongs to, by id, where you know which one it is.
     shift_id: NotRequired[int | None]
-    status: Literal["out", "in", "break"]
+    # What the mark is: coming in, going out, or going on a break.
+    status: AttendanceStatus
+    # When it happened, as `2026-08-01T09:00:00+05:00`. The offset is part of it rather than
+    # optional. Not in the future, and at most 24 hours late.
     datetime: str
+    # A note carried alongside, for people to read.
     comment: NotRequired[str | None]
 
 class DepartmentsListResponse(TypedDict):
@@ -359,11 +489,17 @@ class DepartmentsUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class DepartmentsUpsertBody(TypedDict):
+    # The rows to write. Each carries your own `external_id`, and a row already stored under that
+    # key is updated rather than added.
     items: list[DepartmentsUpsertItem]
 
 class DepartmentsUpsertItem(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
+    # The name this is shown under.
     title: str
+    # Free text about this row, for people rather than for your code.
     description: NotRequired[str | None]
 
 class DepartmentsGetResponse(TypedDict):
@@ -443,19 +579,33 @@ class DocumentsUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class DocumentsUpsertBody(TypedDict):
+    # The documents to write, up to 100 a call.
     documents: list[DocumentsUpsertDocument]
 
 class DocumentsUpsertDocument(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
-    type: Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier"]
+    # Which kind of document this is.
+    type: DocumentsType
+    # The employee this belongs to, by the id this API issued.
     user_id: int
+    # What to call this document.
     name: NotRequired[str | None]
+    # The number written on the contract.
     contract_number: NotRequired[str | None]
-    employment_type: NotRequired[Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"] | None]
+    # The terms the contract is on.
+    employment_type: NotRequired[DocumentsEmploymentType | None]
+    # The day it begins, `YYYY-MM-DD`.
     start_date: NotRequired[str | None]
+    # The day it ends, `YYYY-MM-DD`.
     end_date: NotRequired[str | None]
+    # The day it stops being valid, `YYYY-MM-DD`.
     expiration_date: NotRequired[str | None]
+    # The document this one hangs under, by your key for that one.
     parent_external_id: NotRequired[str | None]
+    # The stored file this points at, from `POST /files`. Upload the bytes first and name the id it
+    # answered with.
     file_id: NotRequired[int | None]
 
 class DocumentsGetResponse(TypedDict):
@@ -549,16 +699,27 @@ class LocationsUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class LocationsUpsertBody(TypedDict):
+    # The rows to write. Each carries your own `external_id`, and a row already stored under that
+    # key is updated rather than added.
     items: list[LocationsUpsertItem]
 
 class LocationsUpsertItem(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
+    # The name this is shown under.
     title: str
+    # Free text about this row, for people rather than for your code.
     description: NotRequired[str | None]
+    # A short code people read, yours to choose. The listing beside this write can filter on it.
     code: NotRequired[str | None]
+    # Where the location is. A mobile clock-in is checked against this and `radius`.
     latitude: NotRequired[float | None]
+    # Where the location is. A mobile clock-in is checked against this and `radius`.
     longitude: NotRequired[float | None]
-    radius: NotRequired[int | None]
+    # How far from those coordinates a mobile clock-in still counts, in metres. A location written
+    # without one gets 100.
+    radius: NotRequired[int]
 
 class LocationsGetResponse(TypedDict):
     data: LocationsGetData
@@ -654,11 +815,17 @@ class PositionsUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class PositionsUpsertBody(TypedDict):
+    # The rows to write. Each carries your own `external_id`, and a row already stored under that
+    # key is updated rather than added.
     items: list[PositionsUpsertItem]
 
 class PositionsUpsertItem(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
+    # The name this is shown under.
     title: str
+    # Free text about this row, for people rather than for your code.
     description: NotRequired[str | None]
 
 class PositionsGetResponse(TypedDict):
@@ -711,6 +878,7 @@ class SchedulesCreateRowUser(TypedDict):
     external_id: str | None
 
 class SchedulesCreateBody(TypedDict):
+    # The days to write, up to 25 a call. Each is one of three shapes, and `type` says which.
     schedules: list[WorkSchedule | FreeSchedule | LeaveSchedule]
 
 class SchedulesGetResponse(TypedDict):
@@ -800,29 +968,51 @@ class TasksUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class TasksUpsertBody(TypedDict):
+    # The tasks to write, up to 100 a call.
     tasks: list[TasksUpsertTask]
 
 class TasksUpsertTask(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
+    # The name this is shown under.
     title: str
+    # Free text about this row, for people rather than for your code.
     description: NotRequired[str | None]
+    # The employee this belongs to, by the id this API issued.
     user_id: int
+    # The category it belongs to, by id.
     category_id: NotRequired[int | None]
+    # The location this is filed against, by id. Null clears it.
     location_id: NotRequired[int | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
+    # The day it is due, `YYYY-MM-DD`.
     due_date: NotRequired[str | None]
+    # When in the day it starts, as a clock time `HH:MM:SS`.
     time_start: NotRequired[str | None]
+    # When in the day it ends, as a clock time `HH:MM:SS`.
     time_end: NotRequired[str | None]
+    # The UTC offset the clock times beside it are read in — `Z`, or `+05:00`. An offset rather than
+    # a zone name, so the day is fixed to a moment rather than to a rule that may be changed later.
     timezone: NotRequired[str | None]
-    priority: NotRequired[int]
+    # Whether the task is flagged as a priority: `1` if it is, `0` if not.
+    priority: NotRequired[TasksPriority]
+    # Whether the task is active.
     active: NotRequired[bool]
+    # The planned figure this task is measured against.
     kpi_plan: NotRequired[float | None]
+    # Who may decide on this task, by id. Up to ten.
     managers: NotRequired[list[int] | None]
+    # The checklist inside this task, in the order given.
     items: NotRequired[list[TasksUpsertTaskItem] | None]
 
 class TasksUpsertTaskItem(TypedDict):
+    # The name this is shown under.
     title: str
+    # Where this item sits in the checklist, counting from zero.
     order: NotRequired[int | None]
 
 class TasksGetResponse(TypedDict):
@@ -954,11 +1144,17 @@ class UserFiltersUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class UserFiltersUpsertBody(TypedDict):
+    # The rows to write. Each carries your own `external_id`, and a row already stored under that
+    # key is updated rather than added.
     items: list[UserFiltersUpsertItem]
 
 class UserFiltersUpsertItem(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: str
+    # The name this is shown under.
     title: str
+    # Free text about this row, for people rather than for your code.
     description: NotRequired[str | None]
 
 class UserFiltersGetResponse(TypedDict):
@@ -1145,43 +1341,75 @@ class UsersDismissResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class UsersDismissBody(TypedDict):
+    # The people to dismiss, up to 100 a call.
     users: list[UsersDismissUser]
 
 class UsersDismissUser(TypedDict):
+    # Who to dismiss, by your key for them. This or `id`, exactly one per item.
     external_id: NotRequired[str]
+    # Who to dismiss, by the id this API issued. This or `external_id`, exactly one per item.
     id: NotRequired[int]
 
 class UsersUpsertResponse(TypedDict):
     data: list[UpsertOutcome]
 
 class UsersUpsertBody(TypedDict):
+    # The people to write, up to 100 a call.
     users: list[UsersUpsertUser]
 
 class UsersUpsertUser(TypedDict):
+    # Your own key for this row. Send it on every write and the next one updates rather than
+    # duplicates.
     external_id: NotRequired[str | None]
+    # Given name. The one field every person must have.
     first_name: str
+    # Middle name, where the place they live uses one.
     middle_name: NotRequired[str | None]
+    # Family name.
     last_name: NotRequired[str | None]
+    # A short code people read, yours to choose. The listing beside this write can filter on it.
     code: NotRequired[str | None]
+    # Their email address.
     email: NotRequired[str | None]
+    # Their phone number.
     phone: NotRequired[str | None]
+    # A second phone number.
     extra_phone: NotRequired[str | None]
-    role: Literal["admin", "employee"]
-    gender: NotRequired[Literal["male", "female", "other"] | None]
-    locale: NotRequired[Literal["en", "ru", "kk", "uk", "id", "uz", "az", "fr", "vi", "zh"] | None]
+    # Whether the person administers the company or is an employee in it.
+    role: UsersRole
+    # Their gender, as the personnel file records it.
+    gender: NotRequired[UsersGender | None]
+    # Which language the application speaks to them in.
+    locale: NotRequired[UsersLocale | None]
+    # The zone they work in, as a name — `Asia/Almaty`. A name rather than an offset, unlike a
+    # schedule or a task, because a person's zone follows the rules of the place they are in.
     timezone: NotRequired[str | None]
+    # The day they started, `YYYY-MM-DD`.
     date_hire: NotRequired[str | None]
+    # The day they leave or left, `YYYY-MM-DD`. Filled in for you on a dismissal that does not carry
+    # one.
     date_leave: NotRequired[str | None]
+    # Their date of birth, `YYYY-MM-DD`.
     date_birth: NotRequired[str | None]
+    # Their national identifier.
     national_id: NotRequired[str | None]
+    # Their tax identifier.
     tax_id: NotRequired[str | None]
+    # Their insurance identifier.
     insurance_id: NotRequired[str | None]
-    employment: NotRequired[Literal["full_time", "part_time", "irregular_hours", "contract_1", "contract_2", "apprenticeship", "traineeship", "piece_rate", "probation", "outstaffing"] | None]
+    # The terms they are employed on.
+    employment: NotRequired[UsersEmployment | None]
+    # Free text about what this person is responsible for.
     responsibility: NotRequired[str | None]
+    # The location they are filed under, by id. Required — everybody belongs somewhere.
     location_id: int
+    # Every other location they may work at, by id, beside the one they are filed under.
     locations: NotRequired[list[int] | None]
+    # The department this is filed against, by id. Null clears it.
     department_id: NotRequired[int | None]
+    # The position this is filed against, by id. Null clears it.
     position_id: NotRequired[int | None]
+    # The groupings they belong to, by id.
     user_filters: NotRequired[list[int] | None]
 
 class UsersGetResponse(TypedDict):
@@ -1336,16 +1564,25 @@ class WebhooksCreateDataHealth(TypedDict):
     disabled_reason: str | None
 
 class WebhooksCreateBody(TypedDict):
+    # What to call this endpoint, so a list of them reads.
     title: NotRequired[str | None]
+    # Where deliveries are posted. `http` or `https`.
     url: str
+    # An address to reach you about this endpoint.
     contact_email: NotRequired[str | None]
-    events: list[Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]]
+    # Which events this endpoint receives. At least one, and no repeats.
+    events: list[WebhooksEvent]
+    # Send deliveries with HTTP basic authentication. Not alongside `auth_token`.
     auth_basic: NotRequired[WebhooksCreateAuthBasic | None]
+    # Send deliveries carrying this bearer token. Not alongside `auth_basic`.
     auth_token: NotRequired[str | None]
+    # Whether the endpoint receives deliveries. False stops them without deleting it.
     active: bool
 
 class WebhooksCreateAuthBasic(TypedDict):
+    # The user for `auth_basic`.
     username: NotRequired[str]
+    # The password for `auth_basic`.
     password: NotRequired[str]
 
 class WebhooksDeliveriesListResponse(TypedDict):
@@ -1447,16 +1684,25 @@ class WebhooksUpdateDataHealth(TypedDict):
     disabled_reason: str | None
 
 class WebhooksUpdateBody(TypedDict):
+    # What to call this endpoint, so a list of them reads.
     title: NotRequired[str | None]
+    # Where deliveries are posted. `http` or `https`.
     url: str
+    # An address to reach you about this endpoint.
     contact_email: NotRequired[str | None]
-    events: list[Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]]
+    # Which events this endpoint receives. At least one, and no repeats.
+    events: list[WebhooksEvent]
+    # Send deliveries with HTTP basic authentication. Not alongside `auth_token`.
     auth_basic: NotRequired[WebhooksUpdateAuthBasic | None]
+    # Send deliveries carrying this bearer token. Not alongside `auth_basic`.
     auth_token: NotRequired[str | None]
+    # Whether the endpoint receives deliveries. False stops them without deleting it.
     active: bool
 
 class WebhooksUpdateAuthBasic(TypedDict):
+    # The user for `auth_basic`.
     username: NotRequired[str]
+    # The password for `auth_basic`.
     password: NotRequired[str]
 
 class WebhooksDeleteResponse(TypedDict):
