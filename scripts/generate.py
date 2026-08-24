@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import keyword
 import re
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,49 @@ OVERRIDES = {
 }
 
 SCALARS = {"string": "str", "integer": "int", "number": "float", "boolean": "bool", "null": "None"}
+
+
+def enum_values(schema: dict[str, Any], declared: str) -> list[Any] | None:
+    """The values of a set the document states coherently, and None where it does not.
+
+    Coherent means the values are of the type declared beside them. A document saying
+    `{"type": "integer", "enum": ["0", "1"]}` disagrees with itself, and a client that picks a side
+    bakes the disagreement into everybody's type checking — so that one is left as the bare type
+    rather than guessed at.
+    """
+    values = schema.get("enum")
+
+    if not values:
+        return None
+
+    holds: dict[str, type] = {"string": str, "integer": int, "number": float}
+    wanted = holds.get(declared)
+
+    if wanted is None:
+        return None
+
+    # A whole number written without a point is an int to JSON and a float to the document.
+    if wanted is float:
+        numeric = all(type(value) in (int, float) for value in values)
+
+        return list(values) if numeric else None
+
+    return list(values) if all(type(value) is wanted for value in values) else None
+
+
+def described(schema: dict[str, Any], indent: str) -> list[str]:
+    """What the document says a field is, as the comment above it.
+
+    A TypedDict member carries no docstring of its own, so a comment is where a description can go.
+    It is the same place the Go client puts one, and it is where jumping to the definition of a body
+    lands somebody who wants to know what a field means.
+    """
+    prose = (schema.get("description") or "").strip()
+
+    if not prose:
+        return []
+
+    return [f"{indent}# {line}" for line in textwrap.wrap(prose, 100 - len(indent) - 2)]
 
 
 def snake(name: str) -> str:
@@ -75,6 +119,9 @@ class Models:
     def __init__(self, document: dict[str, Any]) -> None:
         self.document = document
         self.blocks: dict[str, str] = {}
+        # The closed sets of values, by the name the document gives each. Written as aliases ahead
+        # of the shapes that reference them, so a twenty-seven-value union is spelled once.
+        self.sets: dict[str, str] = {}
         # One operation's shapes, so the same object under two keys of one answer is named once.
         self.scope = ""
         self.shapes: dict[tuple[str, str], str] = {}
@@ -118,10 +165,35 @@ class Models:
         if declared == "object":
             return self.object_type(schema, hint)
 
-        if declared == "string" and schema.get("enum"):
-            return "Literal[" + ", ".join(json.dumps(value) for value in schema["enum"]) + "]"
+        values = enum_values(schema, declared)
+
+        if values is not None:
+            return self.set_type(schema, values)
 
         return SCALARS[declared]
+
+    def set_type(self, schema: dict[str, Any], values: list[Any]) -> str:
+        """A set of values, under the name the document gives it.
+
+        The name is read rather than worked out: deriving one would mean the same rule in four
+        languages kept in step forever, and the document carries it instead. A `Literal` needs no
+        constants beside it — the alias is what a caller completes against, and `get_args()` answers
+        with the values where a check against a file or a dropdown wants them.
+        """
+        literal = "Literal[" + ", ".join(json.dumps(value) for value in values) + "]"
+        name = schema.get("x-clockster-set")
+
+        if not isinstance(name, str):
+            return literal
+
+        held = self.sets.setdefault(name, literal)
+
+        # One name over two different sets would have a caller completing against one and checked
+        # against the other. The document has a test against this; so does this.
+        if held != literal:
+            raise SystemExit(f"{name} names two different sets of values: {held} and {literal}.")
+
+        return name
 
     def object_type(self, schema: dict[str, Any], hint: str) -> str:
         if "properties" in schema:
@@ -183,7 +255,10 @@ class Models:
             return f'{name} = TypedDict("{name}", {{{entries}}})\n'
 
         lines = [f"class {name}(TypedDict):"]
-        lines.extend(f"    {key}: {annotation}" for key, annotation in fields.items())
+
+        for key, annotation in fields.items():
+            lines.extend(described(properties[key], "    "))
+            lines.append(f"    {key}: {annotation}")
 
         return "\n".join(lines) + "\n"
 
@@ -216,8 +291,9 @@ if TYPE_CHECKING:
 
 '''
 
-        names = ",\n".join(f'    "{name}"' for name in sorted(self.blocks))
-        body = "\n\n".join(block.rstrip() for block in self.blocks.values())
+        names = ",\n".join(f'    "{name}"' for name in sorted({**self.sets, **self.blocks}))
+        aliases = [f"{name} = {self.sets[name]}" for name in sorted(self.sets)]
+        body = "\n\n".join([*aliases, *(block.rstrip() for block in self.blocks.values())])
 
         return f"{head}__all__ = [\n{names},\n]\n\n\n{body}\n"
 
@@ -448,12 +524,16 @@ def main() -> int:
     ]
     operations.sort(key=lambda operation: (operation.namespace, operation.name))
 
+    # Rendered before models.py is written, not after: a set carried only by a query parameter is
+    # met while the signatures are built, and models.py has to be able to name it.
+    api = render_api(operations, models)
+
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "__init__.py").write_text(
         '"""Generated from the specification; do not edit by hand."""\n'
     )
     (OUT / "models.py").write_text(models.source())
-    (OUT / "api.py").write_text(render_api(operations, models))
+    (OUT / "api.py").write_text(api)
 
     print(f"{len(operations)} operations, {len(models.blocks)} shapes.")
 

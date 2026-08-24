@@ -156,6 +156,31 @@ for user in paginate(clockster.users.list):
     print(user["first_name"])
 ```
 
+## Sets of values
+
+Where a field takes one of a fixed set, the set is a named `Literal`:
+
+```python
+from clockster.models import UsersRole, UsersStatus
+
+clockster.users.upsert({"users": [{
+    "external_id": "HR-1",
+    "first_name": "Aisulu",
+    "role": "employee",     # a checker reads this against UsersRole
+    "location_id": 3,
+}]})
+
+clockster.users.list(status="active", include=["location"])
+```
+
+A checker completes the value and refuses a typo, and nothing has to be unwrapped to send one — the
+values *are* the type. `get_args(UsersRole)` answers them all where a check against a file or a
+dropdown wants them.
+
+Every set is on something you send, and none is in an answer. That is deliberate on the API's part:
+a `status` we start answering with next year reaches your code as the string it is, where a closed
+type would have refused it. So write against the set and read whatever arrives.
+
 ## Async
 
 `AsyncClockster` mirrors the whole surface.
