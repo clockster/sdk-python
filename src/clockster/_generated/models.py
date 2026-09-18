@@ -233,7 +233,7 @@ DocumentsInclude = Literal["attachments", "signers", "labor_contract"]
 
 DocumentsParty = Literal["employee", "counterparty"]
 
-DocumentsType = Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier"]
+DocumentsType = Literal["passport", "cv", "diploma", "medical", "photo", "other", "medical_book", "employment_agreement", "termination_of_employment_agreement", "equipment_agreement", "application", "order", "supplementary_agreement", "job_description", "nda", "non_compete_agreement", "data_processing_agreement", "act_of_service_acceptance", "health_and_safety_briefing", "shift_schedule", "letter", "vacation_schedule", "contract", "agreement", "goods_release_note", "reconciliation_act", "return_to_supplier", "driver_license", "birth_certificate", "marriage_certificate", "divorce_certificate", "change_fio_certificate"]
 
 LocationsInclude = Literal["managers"]
 
