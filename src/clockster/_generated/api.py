@@ -52,6 +52,73 @@ class PayrollPayslips(_Namespace):
         )
 
 
+class PayrollSingleAdjustments(_Namespace):
+    """`clockster.payroll.single_adjustments`."""
+
+    def create(self, body: PayrollSingleAdjustmentsCreateBody, *, idempotency_key: str | None = None) -> PayrollSingleAdjustmentsCreateResponse:
+        """Create single adjustments
+
+        Up to 100 one-off amounts — a bonus, a service charge, a penalty — each for one person
+        and one day. All or nothing: a `422` means none of the batch landed.
+
+        **An adjustment is read when a payslip is calculated.** A `draft` payslip whose period
+        holds `date` takes it in on its next calculation. An `approved` or `paid` one does not:
+        it is recalculated only by hand in the web application, and nothing here tells you
+        whether that happened. Check the payslip's status for the month before filing into it.
+
+        **Send an `Idempotency-Key`.** An adjustment carries no key of yours, so a retry after a
+        timeout files it a second time unless the header says it is the same attempt. The
+        answer lists what was created, in the order sent.
+        """
+        return cast(
+            PayrollSingleAdjustmentsCreateResponse,
+            self._transport.request(
+                "POST",
+                "/company/v3/payroll/single-adjustments",
+                json=body,
+                idempotency_key=idempotency_key,
+            ),
+        )
+
+    def delete(self, id: int) -> PayrollSingleAdjustmentsDeleteResponse:
+        """Delete a single adjustment
+
+        Deletes the adjustment. A payslip already calculated with it keeps the amount until it
+        is calculated again — for an `approved` or `paid` one, only by hand in the web
+        application.
+
+        Another company's id is a `404`.
+        """
+        return cast(
+            PayrollSingleAdjustmentsDeleteResponse,
+            self._transport.request(
+                "DELETE",
+                f"/company/v3/payroll/single-adjustments/{id}",
+            ),
+        )
+
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, types: list[PayrollSingleAdjustmentsType] | None = None, date_from: str | None = None, date_to: str | None = None) -> PayrollSingleAdjustmentsListResponse:
+        """List single adjustments
+
+        One-off additions and deductions, oldest first, with who they are for and the day they
+        are dated.
+
+        `amount` is never negative: `type` says whether it is added or taken off, and whether
+        before or after tax. `date_from` and `date_to` bound the day, inclusive.
+
+        Rows filed in the web application are listed too, and may carry `13th_pay`, which is
+        computed there rather than filed here.
+        """
+        return cast(
+            PayrollSingleAdjustmentsListResponse,
+            self._transport.request(
+                "GET",
+                "/company/v3/payroll/single-adjustments",
+                query={"per_page": per_page, "cursor": cursor, "users": users, "types": types, "date_from": date_from, "date_to": date_to},
+            ),
+        )
+
+
 class WebhooksDeliveries(_Namespace):
     """`clockster.webhooks.deliveries`."""
 
@@ -509,6 +576,7 @@ class Payroll(_Namespace):
     def __init__(self, transport: _SyncTransport) -> None:
         super().__init__(transport)
         self.payslips = PayrollPayslips(transport)
+        self.single_adjustments = PayrollSingleAdjustments(transport)
 
 
 class Positions(_Namespace):
@@ -1256,6 +1324,73 @@ class AsyncPayrollPayslips(_AsyncNamespace):
         )
 
 
+class AsyncPayrollSingleAdjustments(_AsyncNamespace):
+    """`clockster.payroll.single_adjustments`."""
+
+    async def create(self, body: PayrollSingleAdjustmentsCreateBody, *, idempotency_key: str | None = None) -> PayrollSingleAdjustmentsCreateResponse:
+        """Create single adjustments
+
+        Up to 100 one-off amounts — a bonus, a service charge, a penalty — each for one person
+        and one day. All or nothing: a `422` means none of the batch landed.
+
+        **An adjustment is read when a payslip is calculated.** A `draft` payslip whose period
+        holds `date` takes it in on its next calculation. An `approved` or `paid` one does not:
+        it is recalculated only by hand in the web application, and nothing here tells you
+        whether that happened. Check the payslip's status for the month before filing into it.
+
+        **Send an `Idempotency-Key`.** An adjustment carries no key of yours, so a retry after a
+        timeout files it a second time unless the header says it is the same attempt. The
+        answer lists what was created, in the order sent.
+        """
+        return cast(
+            PayrollSingleAdjustmentsCreateResponse,
+            await self._transport.request(
+                "POST",
+                "/company/v3/payroll/single-adjustments",
+                json=body,
+                idempotency_key=idempotency_key,
+            ),
+        )
+
+    async def delete(self, id: int) -> PayrollSingleAdjustmentsDeleteResponse:
+        """Delete a single adjustment
+
+        Deletes the adjustment. A payslip already calculated with it keeps the amount until it
+        is calculated again — for an `approved` or `paid` one, only by hand in the web
+        application.
+
+        Another company's id is a `404`.
+        """
+        return cast(
+            PayrollSingleAdjustmentsDeleteResponse,
+            await self._transport.request(
+                "DELETE",
+                f"/company/v3/payroll/single-adjustments/{id}",
+            ),
+        )
+
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, users: list[int] | None = None, types: list[PayrollSingleAdjustmentsType] | None = None, date_from: str | None = None, date_to: str | None = None) -> PayrollSingleAdjustmentsListResponse:
+        """List single adjustments
+
+        One-off additions and deductions, oldest first, with who they are for and the day they
+        are dated.
+
+        `amount` is never negative: `type` says whether it is added or taken off, and whether
+        before or after tax. `date_from` and `date_to` bound the day, inclusive.
+
+        Rows filed in the web application are listed too, and may carry `13th_pay`, which is
+        computed there rather than filed here.
+        """
+        return cast(
+            PayrollSingleAdjustmentsListResponse,
+            await self._transport.request(
+                "GET",
+                "/company/v3/payroll/single-adjustments",
+                query={"per_page": per_page, "cursor": cursor, "users": users, "types": types, "date_from": date_from, "date_to": date_to},
+            ),
+        )
+
+
 class AsyncWebhooksDeliveries(_AsyncNamespace):
     """`clockster.webhooks.deliveries`."""
 
@@ -1713,6 +1848,7 @@ class AsyncPayroll(_AsyncNamespace):
     def __init__(self, transport: _AsyncTransport) -> None:
         super().__init__(transport)
         self.payslips = AsyncPayrollPayslips(transport)
+        self.single_adjustments = AsyncPayrollSingleAdjustments(transport)
 
 
 class AsyncPositions(_AsyncNamespace):
