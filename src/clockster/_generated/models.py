@@ -83,6 +83,16 @@ __all__ = [
     "PayrollPayslipsListRowSalary",
     "PayrollPayslipsListRowUser",
     "PayrollPayslipsStatus",
+    "PayrollSingleAdjustmentsCreateAdjustment",
+    "PayrollSingleAdjustmentsCreateBody",
+    "PayrollSingleAdjustmentsCreateResponse",
+    "PayrollSingleAdjustmentsCreateRow",
+    "PayrollSingleAdjustmentsCreateRowUser",
+    "PayrollSingleAdjustmentsDeleteResponse",
+    "PayrollSingleAdjustmentsListResponse",
+    "PayrollSingleAdjustmentsListRow",
+    "PayrollSingleAdjustmentsListRowUser",
+    "PayrollSingleAdjustmentsType",
     "PositionsDeleteResponse",
     "PositionsGetData",
     "PositionsGetResponse",
@@ -238,6 +248,8 @@ DocumentsType = Literal["passport", "cv", "diploma", "medical", "photo", "other"
 LocationsInclude = Literal["managers"]
 
 PayrollPayslipsStatus = Literal["draft", "approved", "paid"]
+
+PayrollSingleAdjustmentsType = Literal["service_charge", "single_addition_pre_tax", "single_addition_post_tax", "single_loan", "single_deduction_pre_tax", "single_deduction_post_tax"]
 
 SchedulesLeaveType = Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
 
@@ -797,6 +809,60 @@ class PayrollPayslipsListMeta(TypedDict):
     per_page: int
     next_cursor: str | None
     prev_cursor: str | None
+
+class PayrollSingleAdjustmentsListResponse(TypedDict):
+    data: list[PayrollSingleAdjustmentsListRow]
+    links: PageLinks
+    meta: PageMeta
+
+class PayrollSingleAdjustmentsListRow(TypedDict):
+    id: int
+    user: PayrollSingleAdjustmentsListRowUser
+    type: str
+    title: str | None
+    amount: float | None
+    date: str
+    created_at: str
+
+class PayrollSingleAdjustmentsListRowUser(TypedDict):
+    id: int
+    external_id: str | None
+
+class PayrollSingleAdjustmentsCreateResponse(TypedDict):
+    data: list[PayrollSingleAdjustmentsCreateRow]
+
+class PayrollSingleAdjustmentsCreateRow(TypedDict):
+    id: int
+    user: PayrollSingleAdjustmentsCreateRowUser
+    type: str
+    title: str | None
+    amount: float | None
+    date: str
+    created_at: str
+
+class PayrollSingleAdjustmentsCreateRowUser(TypedDict):
+    id: int
+    external_id: str | None
+
+class PayrollSingleAdjustmentsCreateBody(TypedDict):
+    # The adjustments to file, up to 100 a call.
+    adjustments: list[PayrollSingleAdjustmentsCreateAdjustment]
+
+class PayrollSingleAdjustmentsCreateAdjustment(TypedDict):
+    # The employee this belongs to, by the id this API issued.
+    user_id: int
+    # What the amount does: an addition or a deduction, before or after tax, a service charge or a
+    # one-off loan.
+    type: PayrollSingleAdjustmentsType
+    # How much, never negative — `type` says which way it goes. At most two decimal places.
+    amount: float
+    # The day it is dated, `YYYY-MM-DD`. The payslip whose period holds this day takes it in.
+    date: str
+    # The name this is shown under.
+    title: NotRequired[str | None]
+
+class PayrollSingleAdjustmentsDeleteResponse(TypedDict):
+    data: DeleteOutcome
 
 class PositionsListResponse(TypedDict):
     data: list[PositionsListRow]

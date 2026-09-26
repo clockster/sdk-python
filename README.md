@@ -97,6 +97,7 @@ everything.
 | `documents` | `list` `get` `upsert` `delete` |
 | `files` | `upload` |
 | `payroll.payslips` | `list` |
+| `payroll.single_adjustments` | `list` `create` `delete` |
 | `user_requests` | `list` `get` |
 | `webhooks` | `list` `get` `create` `update` `delete` `rotate_secret` |
 | `webhooks.deliveries` | `list` `get` `redeliver` |
