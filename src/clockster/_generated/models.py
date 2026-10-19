@@ -249,7 +249,7 @@ LocationsInclude = Literal["managers"]
 
 PayrollPayslipsStatus = Literal["draft", "approved", "paid"]
 
-PayrollSingleAdjustmentsType = Literal["service_charge", "single_addition_pre_tax", "single_addition_post_tax", "single_loan", "single_deduction_pre_tax", "single_deduction_post_tax"]
+PayrollSingleAdjustmentsType = Literal["service_charge", "single_addition_pre_tax", "single_addition_post_tax", "single_loan", "single_deduction_pre_tax", "single_deduction_post_tax", "withholding"]
 
 SchedulesLeaveType = Literal["annual", "unpaid", "sick", "unpaid_sick", "maternity", "paternity", "special", "day_off", "compensatory", "personal", "emergency", "unexcused_absence"]
 
@@ -851,8 +851,8 @@ class PayrollSingleAdjustmentsCreateBody(TypedDict):
 class PayrollSingleAdjustmentsCreateAdjustment(TypedDict):
     # The employee this belongs to, by the id this API issued.
     user_id: int
-    # What the amount does: an addition or a deduction, before or after tax, a service charge or a
-    # one-off loan.
+    # What the amount does: an addition or a deduction, before or after tax, a service charge, a
+    # one-off loan, or a withholding from the take-home pay that leaves the company's cost as it is.
     type: PayrollSingleAdjustmentsType
     # How much, never negative — `type` says which way it goes. At most two decimal places.
     amount: float
