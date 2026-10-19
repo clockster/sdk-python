@@ -106,6 +106,9 @@ class PayrollSingleAdjustments(_Namespace):
         `amount` is never negative: `type` says whether it is added or taken off, and whether
         before or after tax. `date_from` and `date_to` bound the day, inclusive.
 
+        A `withholding` comes off the take-home pay alone, as a loan repayment does: the
+        company's cost keeps it, where a `single_deduction_post_tax` lowers both.
+
         Rows filed in the web application are listed too, and may carry `13th_pay`, which is
         computed there rather than filed here.
         """
@@ -344,6 +347,10 @@ class Documents(_Namespace):
         Deletes the document, its file records and the stored objects behind them.
 
         **A document everyone has signed cannot be deleted** — `409`, code `document_signed`.
+
+        **A document sent to a counterparty**, by e-mail or a copied signing link, **cannot be
+        deleted** — `409`, code `document_sent_to_counterparty`. It is withdrawn in the app
+        instead, as the web app requires.
 
         Another company's id is a `404`.
         """
@@ -1378,6 +1385,9 @@ class AsyncPayrollSingleAdjustments(_AsyncNamespace):
         `amount` is never negative: `type` says whether it is added or taken off, and whether
         before or after tax. `date_from` and `date_to` bound the day, inclusive.
 
+        A `withholding` comes off the take-home pay alone, as a loan repayment does: the
+        company's cost keeps it, where a `single_deduction_post_tax` lowers both.
+
         Rows filed in the web application are listed too, and may carry `13th_pay`, which is
         computed there rather than filed here.
         """
@@ -1616,6 +1626,10 @@ class AsyncDocuments(_AsyncNamespace):
         Deletes the document, its file records and the stored objects behind them.
 
         **A document everyone has signed cannot be deleted** — `409`, code `document_signed`.
+
+        **A document sent to a counterparty**, by e-mail or a copied signing link, **cannot be
+        deleted** — `409`, code `document_sent_to_counterparty`. It is withdrawn in the app
+        instead, as the web app requires.
 
         Another company's id is a `404`.
         """
