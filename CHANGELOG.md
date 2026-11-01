@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.0
+
+### May break your build (types only)
+
+Nothing. Four operations and five sets are new.
+
+### New
+
+- `clockster.checklists`: `list`, `get`, `create` and `delete`, blocking and awaited, over
+  `/checklists` — the checklists your company issues, one row shared by everyone a checklist is
+  aimed at. `create` files up to 100 of today's checklists, each once under your `external_id`: a
+  key already on file answers `exists`, so a resend after a timeout is safe. `delete` takes back one
+  nobody has worked on yet; after that it answers `409` with `checklist_locked`.
+- These calls need `checklists:read` and `checklists:write` on the API key, unless it is `full`.
+- `ChecklistsInclude`, `ChecklistsItemType`, `ChecklistsPriority`, `ChecklistsStatus` and
+  `ChecklistsType` in `clockster.models`, each a `Literal` of its values.
+
 ## 0.6.0
 
 ### May break your build (types only)
