@@ -26,6 +26,33 @@ __all__ = [
     "AttendanceRecordRow",
     "AttendanceSource",
     "AttendanceStatus",
+    "ChecklistsCreateBody",
+    "ChecklistsCreateChecklist",
+    "ChecklistsCreateChecklistItem",
+    "ChecklistsCreateResponse",
+    "ChecklistsDeleteResponse",
+    "ChecklistsGetData",
+    "ChecklistsGetDataComment",
+    "ChecklistsGetDataIssue",
+    "ChecklistsGetDataItem",
+    "ChecklistsGetDataItemAttachment",
+    "ChecklistsGetDataItemUser",
+    "ChecklistsGetDataManager",
+    "ChecklistsGetResponse",
+    "ChecklistsInclude",
+    "ChecklistsItemType",
+    "ChecklistsListMeta",
+    "ChecklistsListResponse",
+    "ChecklistsListRow",
+    "ChecklistsListRowComment",
+    "ChecklistsListRowIssue",
+    "ChecklistsListRowItem",
+    "ChecklistsListRowItemAttachment",
+    "ChecklistsListRowItemUser",
+    "ChecklistsListRowManager",
+    "ChecklistsPriority",
+    "ChecklistsStatus",
+    "ChecklistsType",
     "DeleteOutcome",
     "DepartmentsDeleteResponse",
     "DepartmentsGetData",
@@ -234,6 +261,16 @@ AttendanceInclude = Literal["user", "location", "attachments"]
 AttendanceSource = Literal["device", "mobile", "frontend", "api", "system"]
 
 AttendanceStatus = Literal["out", "in", "break"]
+
+ChecklistsInclude = Literal["items", "managers", "users", "issues", "comments", "attachments", "author"]
+
+ChecklistsItemType = Literal["checkbox", "boolean", "option", "number", "comment"]
+
+ChecklistsPriority = Literal["low", "normal", "high"]
+
+ChecklistsStatus = Literal["created", "started", "completed", "incompleted", "pastdue", "pending"]
+
+ChecklistsType = Literal["default", "audit"]
 
 DepartmentsInclude = Literal["managers"]
 
@@ -482,6 +519,335 @@ class AttendanceRecordAttendanceItem(TypedDict):
     datetime: str
     # A note carried alongside, for people to read.
     comment: NotRequired[str | None]
+
+class ChecklistsListResponse(TypedDict):
+    data: list[ChecklistsListRow]
+    meta: ChecklistsListMeta
+
+class ChecklistsListRow(TypedDict):
+    id: int
+    external_id: str | None
+    title: str
+    description: str | None
+    type: str
+    status: str
+    priority: str
+    min_score: int | None
+    score_percent: int
+    template_id: int | None
+    author_id: int | None
+    locations: list[int]
+    departments: list[int]
+    positions: list[int]
+    user_filters: list[int]
+    date_start: str | None
+    date_end: str | None
+    time_start: str | None
+    time_end: str | None
+    timezone: str | None
+    time_notify: str | None
+    req_approve: bool
+    req_notify: bool
+    geofence: bool
+    gallery: bool
+    is_keep_status: bool
+    time_worked: int
+    started_at: str | None
+    completed_at: str | None
+    created_at: str
+    updated_at: str
+    items: NotRequired[list[ChecklistsListRowItem]]
+    managers: NotRequired[list[ChecklistsListRowManager]]
+    users: NotRequired[list[EmployeeShort]]
+    issues: NotRequired[list[ChecklistsListRowIssue]]
+    comments: NotRequired[list[ChecklistsListRowComment]]
+    attachments: NotRequired[list[ChecklistsListRowItemAttachment]]
+    author: NotRequired[ChecklistsListRowItemUser | None]
+
+class ChecklistsListRowItem(TypedDict):
+    id: int
+    section: str | None
+    title: str
+    type: str
+    is_required: bool
+    photos: int
+    geofence: bool
+    time_start: str | None
+    time_end: str | None
+    min_number: int | None
+    max_number: int | None
+    value: bool | int | str | None
+    note: str | None
+    score: int
+    is_completed: bool
+    completed_at: str | None
+    user: ChecklistsListRowItemUser | None
+    latitude: float | None
+    longitude: float | None
+    has_issue: bool
+    issue: str | None
+    attachments: list[ChecklistsListRowItemAttachment]
+
+class ChecklistsListRowItemUser(TypedDict):
+    id: int
+    external_id: str | None
+    code: str | None
+    first_name: str
+    middle_name: str | None
+    last_name: str
+
+class ChecklistsListRowItemAttachment(TypedDict):
+    id: int
+    name: str
+    description: str | None
+    format: str
+    url: str
+    created_at: str
+
+class ChecklistsListRowManager(TypedDict):
+    id: int
+    external_id: str | None
+    code: str | None
+    first_name: str
+    middle_name: str | None
+    last_name: str
+    status: str
+    updated_at: str
+
+class ChecklistsListRowIssue(TypedDict):
+    id: int
+    item_id: int
+    stage: str
+    severity: str
+    description: str | None
+    reporter_id: int | None
+    assignee_id: int | None
+    due_date: str | None
+    resolved_note: str | None
+    resolved_at: str | None
+    resolved_by: int | None
+    verified_at: str | None
+    verified_by: int | None
+    created_at: str
+
+class ChecklistsListRowComment(TypedDict):
+    id: int
+    parent_id: int | None
+    user: ChecklistsListRowItemUser | None
+    text: str
+    created_at: str
+
+class ChecklistsListMeta(TypedDict):
+    per_page: int
+    next_cursor: str | None
+    prev_cursor: str | None
+
+class ChecklistsCreateResponse(TypedDict):
+    data: list[UpsertOutcome]
+
+class ChecklistsCreateBody(TypedDict):
+    # The checklists to create, up to 100 a call and 2,000 items across them.
+    checklists: list[ChecklistsCreateChecklist]
+
+class ChecklistsCreateChecklist(TypedDict):
+    # Your own key for this checklist. A key already on file answers `exists` and nothing is
+    # applied.
+    external_id: str
+    # The name this is shown under.
+    title: str
+    # Free text about this row, for people rather than for your code.
+    description: NotRequired[str | None]
+    # On a checklist, `default` or `audit`. On an item, the answer it takes: `checkbox` or `boolean`
+    # a boolean, `option` one of `bad`, `normal` or `good`, `number` an integer, `comment` free
+    # text.
+    type: ChecklistsType
+    priority: ChecklistsPriority
+    # The UTC offset the clock times beside it are read in — `Z`, or `+05:00`. An offset rather than
+    # a zone name, so the day is fixed to a moment rather than to a rule that may be changed later.
+    timezone: str
+    # The day it opens, `YYYY-MM-DD`: today in `timezone` for a new key.
+    date_start: str
+    # The last day it may be filled in, `YYYY-MM-DD`: on or after `date_start`, at most 30 days past
+    # it.
+    date_end: str
+    # When in the day it starts, as a clock time `HH:MM:SS`.
+    time_start: NotRequired[str | None]
+    # When in the day it ends, as a clock time `HH:MM:SS`.
+    time_end: NotRequired[str | None]
+    # When today the "new checklist" push goes out, `HH:MM:SS` in `timezone`.
+    time_notify: NotRequired[str | None]
+    req_approve: NotRequired[bool]
+    req_notify: NotRequired[bool]
+    geofence: NotRequired[bool]
+    gallery: NotRequired[bool]
+    # Keeps the status when the time runs out: an untouched checklist stays `created` rather than
+    # turning `pastdue`, and a started one stays `started` rather than being handed in by itself.
+    is_keep_status: NotRequired[bool]
+    # The pass mark for `score_percent`. A handed-in checklist below `min_score`, or with any item
+    # left unticked, is `incompleted`; an open required item refuses the hand-in. With `req_approve`
+    # it goes to `pending`, and the same rule settles it once approved.
+    min_score: NotRequired[int | None]
+    # Who it is filed under, by id; the author can fill it in too. Without it the checklist has no
+    # author, and the checklists report names the calling key instead.
+    author_id: NotRequired[int | None]
+    # Aimed at people at these locations, by id. Left out or empty: every location. Your company's
+    # own locations only: one shared from a parent company, which `GET /company/v3/locations` also
+    # lists, is a `422`.
+    locations: NotRequired[list[int] | None]
+    # Aimed at people in these departments, by id. Left out or empty: every department.
+    departments: NotRequired[list[int] | None]
+    # Aimed at people in these positions, by id. Left out or empty: every position.
+    positions: NotRequired[list[int] | None]
+    # Aimed at people in these user filters, by id. Left out or empty: every user filter. It narrows
+    # who sees the checklist but lets nobody fill it in.
+    user_filters: NotRequired[list[int] | None]
+    # People the checklist is assigned to by name, by id, on top of the audience.
+    users: NotRequired[list[int] | None]
+    # Who approves or is notified, by id. Required with `req_approve` or `req_notify`.
+    managers: NotRequired[list[int] | None]
+    # The questions, in the order given.
+    items: list[ChecklistsCreateChecklistItem]
+
+class ChecklistsCreateChecklistItem(TypedDict):
+    # The heading the item sits under. Items naming the same section share it; an item without one
+    # sits under an unnamed one.
+    section: NotRequired[str | None]
+    # The name this is shown under.
+    title: str
+    # On a checklist, `default` or `audit`. On an item, the answer it takes: `checkbox` or `boolean`
+    # a boolean, `option` one of `bad`, `normal` or `good`, `number` an integer, `comment` free
+    # text.
+    type: ChecklistsItemType
+    is_required: bool
+    photos: int
+    geofence: bool
+    # When in the day it starts, as a clock time `HH:MM:SS`.
+    time_start: NotRequired[str | None]
+    # When in the day it ends, as a clock time `HH:MM:SS`.
+    time_end: NotRequired[str | None]
+    # What the item weighs in `score_percent`.
+    score: NotRequired[int | None]
+    min_number: NotRequired[int | None]
+    max_number: NotRequired[int | None]
+
+class ChecklistsGetResponse(TypedDict):
+    data: ChecklistsGetData
+
+class ChecklistsGetData(TypedDict):
+    id: int
+    external_id: str | None
+    title: str
+    description: str | None
+    type: str
+    status: str
+    priority: str
+    min_score: int | None
+    score_percent: int
+    template_id: int | None
+    author_id: int | None
+    locations: list[int]
+    departments: list[int]
+    positions: list[int]
+    user_filters: list[int]
+    date_start: str | None
+    date_end: str | None
+    time_start: str | None
+    time_end: str | None
+    timezone: str | None
+    time_notify: str | None
+    req_approve: bool
+    req_notify: bool
+    geofence: bool
+    gallery: bool
+    is_keep_status: bool
+    time_worked: int
+    started_at: str | None
+    completed_at: str | None
+    created_at: str
+    updated_at: str
+    items: NotRequired[list[ChecklistsGetDataItem]]
+    managers: NotRequired[list[ChecklistsGetDataManager]]
+    users: NotRequired[list[EmployeeShort]]
+    issues: NotRequired[list[ChecklistsGetDataIssue]]
+    comments: NotRequired[list[ChecklistsGetDataComment]]
+    attachments: NotRequired[list[ChecklistsGetDataItemAttachment]]
+    author: NotRequired[ChecklistsGetDataItemUser | None]
+
+class ChecklistsGetDataItem(TypedDict):
+    id: int
+    section: str | None
+    title: str
+    type: str
+    is_required: bool
+    photos: int
+    geofence: bool
+    time_start: str | None
+    time_end: str | None
+    min_number: int | None
+    max_number: int | None
+    value: bool | int | str | None
+    note: str | None
+    score: int
+    is_completed: bool
+    completed_at: str | None
+    user: ChecklistsGetDataItemUser | None
+    latitude: float | None
+    longitude: float | None
+    has_issue: bool
+    issue: str | None
+    attachments: list[ChecklistsGetDataItemAttachment]
+
+class ChecklistsGetDataItemUser(TypedDict):
+    id: int
+    external_id: str | None
+    code: str | None
+    first_name: str
+    middle_name: str | None
+    last_name: str
+
+class ChecklistsGetDataItemAttachment(TypedDict):
+    id: int
+    name: str
+    description: str | None
+    format: str
+    url: str
+    created_at: str
+
+class ChecklistsGetDataManager(TypedDict):
+    id: int
+    external_id: str | None
+    code: str | None
+    first_name: str
+    middle_name: str | None
+    last_name: str
+    status: str
+    updated_at: str
+
+class ChecklistsGetDataIssue(TypedDict):
+    id: int
+    item_id: int
+    stage: str
+    severity: str
+    description: str | None
+    reporter_id: int | None
+    assignee_id: int | None
+    due_date: str | None
+    resolved_note: str | None
+    resolved_at: str | None
+    resolved_by: int | None
+    verified_at: str | None
+    verified_by: int | None
+    created_at: str
+
+class ChecklistsGetDataComment(TypedDict):
+    id: int
+    parent_id: int | None
+    user: ChecklistsGetDataItemUser | None
+    text: str
+    created_at: str
+
+class ChecklistsDeleteResponse(TypedDict):
+    data: DeleteOutcome
 
 class DepartmentsListResponse(TypedDict):
     data: list[DepartmentsListRow]

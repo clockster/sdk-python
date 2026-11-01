@@ -272,6 +272,126 @@ class Attendance(_Namespace):
         )
 
 
+class Checklists(_Namespace):
+    """`clockster.checklists`."""
+
+    def create(self, body: ChecklistsCreateBody) -> ChecklistsCreateResponse:
+        """Create checklists
+
+        Up to 100 checklists in one call, each created once under your `external_id`, which is
+        required here.
+
+        **One checklist is one row shared by everyone it is aimed at**, as the web app creates
+        it, and whoever fills it in answers for all of them. A result per location needs a
+        checklist per location.
+
+        **Somebody has to be able to fill it in**: its author, its `users`, or anyone at its
+        `locations`, `departments` or `positions`. A new row that names none of them is a `422`.
+
+        **Only today's checklists.** A new key's `date_start` is today in its `timezone`. The
+        lists in the product file a checklist by the UTC date it was created on, so send a day's
+        checklists while that date is also the date in UTC, or they show under another day.
+
+        **The "new checklist" push** goes out at `time_notify`, else at `time_start`, today — at
+        once when neither is set, and not at all once that time has passed. It reaches the people
+        in a named audience, plus `users` and `author_id`.
+
+        **Create only, so `exists` means nothing was applied.** A key already on file answers
+        `exists` with its id, whatever the row sent now says, so a resend after a timeout is
+        safe. A checklist nobody has touched yet is changed by deleting it and creating it again;
+        a missed one is rescheduled under a new `external_id`.
+
+        A new key's ids are checked against your company, and the flags left out stay off. The
+        answer lists every row, in the order sent, as `created` or `exists`.
+        """
+        return cast(
+            ChecklistsCreateResponse,
+            self._transport.request(
+                "POST",
+                "/company/v3/checklists",
+                json=body,
+            ),
+        )
+
+    def delete(self, id: int) -> ChecklistsDeleteResponse:
+        """Delete a checklist
+
+        Deletes a checklist nobody has touched, and its discussion.
+
+        **Refused once anybody has worked on it** — 409, `checklist_locked`: it was started or
+        is past due, an item was answered, it or one of its items carries a file (the author's
+        reference files included), or it has an issue or a comment. One with `is_keep_status`
+        never turns past due, so it stays deletable after its dates until somebody works on it.
+        The refusal is final; reschedule under a new `external_id` instead. A checklist the web
+        app or a template issued with files therefore cannot be deleted here.
+
+        A `404` on a repeated delete means it is gone. The id comes from the create answer or
+        from `GET /company/v3/checklists?external_ids=`. A deletion is not visible to polling
+        with `updated_since`.
+        """
+        return cast(
+            ChecklistsDeleteResponse,
+            self._transport.request(
+                "DELETE",
+                f"/company/v3/checklists/{id}",
+            ),
+        )
+
+    def get(self, id: int, *, include: list[ChecklistsInclude] | None = None) -> ChecklistsGetResponse:
+        """Read one checklist
+
+        The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
+        """
+        return cast(
+            ChecklistsGetResponse,
+            self._transport.request(
+                "GET",
+                f"/company/v3/checklists/{id}",
+                query={"include": include},
+            ),
+        )
+
+    def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, statuses: list[ChecklistsStatus] | None = None, types: list[ChecklistsType] | None = None, templates: list[int] | None = None, locations: list[int] | None = None, start_from: str | None = None, start_to: str | None = None, updated_since: str | None = None, search: str | None = None, include: list[ChecklistsInclude] | None = None) -> ChecklistsListResponse:
+        """List checklists
+
+        Checklists as we hold them, oldest first, paged on a cursor: what was issued, how far it
+        got, and what was answered.
+
+        **One checklist is one row shared by everyone it is aimed at.** Whoever fills it in
+        answers for all of them: its author, its `users`, or anyone at its `locations`,
+        `departments` or `positions`. `user_filters` narrows who sees it but lets nobody fill it
+        in. A result per location needs a checklist per location.
+
+        `include=items` adds the questions with their answers. **An item's `value` follows its
+        `type`**: `checkbox` and `boolean` answer a boolean, `option` one of `bad`, `normal` or
+        `good`, `number` an integer, `comment` a string. It is null until somebody answers.
+
+        `score_percent` is what the answered items scored, weighted by their `score`. A
+        handed-in checklist below `min_score`, or with any item left unticked, is `incompleted`;
+        an open required item refuses the hand-in. With `req_approve` it goes to `pending`, and
+        the same rule settles it once approved.
+
+        `locations` matches a checklist aimed at one of those locations; one aimed at every
+        location (empty `locations`) is not matched. `start_from` and `start_to` are on
+        `date_start`, and a checklist without one is not matched.
+
+        **`updated_since` sees the work**: an answer, a file added to or removed from the
+        checklist or one of its items, an approver's decision and an issue resolved from its task
+        all move `updated_at`. A comment does not, and neither does a template or a person
+        deleted for good, which empties `template_id`, `author_id` or an item's `user`, or drops
+        the person from `managers` and `users`. A deleted checklist is simply no longer listed,
+        so polling cannot see a deletion.
+        """
+        return cast(
+            ChecklistsListResponse,
+            self._transport.request(
+                "GET",
+                "/company/v3/checklists",
+                query={"per_page": per_page, "cursor": cursor, "external_ids": external_ids, "statuses": statuses, "types": types, "templates": templates, "locations": locations, "start_from": start_from, "start_to": start_to, "updated_since": updated_since, "search": search, "include": include},
+            ),
+        )
+
+
 class Departments(_Namespace):
     """`clockster.departments`."""
 
@@ -1259,6 +1379,7 @@ class _ClocksterApi(_Namespace):
     def __init__(self, transport: _SyncTransport) -> None:
         super().__init__(transport)
         self.attendance = Attendance(transport)
+        self.checklists = Checklists(transport)
         self.departments = Departments(transport)
         self.documents = Documents(transport)
         self.files = Files(transport)
@@ -1547,6 +1668,126 @@ class AsyncAttendance(_AsyncNamespace):
                 "POST",
                 "/company/v3/attendance",
                 json=body,
+            ),
+        )
+
+
+class AsyncChecklists(_AsyncNamespace):
+    """`clockster.checklists`."""
+
+    async def create(self, body: ChecklistsCreateBody) -> ChecklistsCreateResponse:
+        """Create checklists
+
+        Up to 100 checklists in one call, each created once under your `external_id`, which is
+        required here.
+
+        **One checklist is one row shared by everyone it is aimed at**, as the web app creates
+        it, and whoever fills it in answers for all of them. A result per location needs a
+        checklist per location.
+
+        **Somebody has to be able to fill it in**: its author, its `users`, or anyone at its
+        `locations`, `departments` or `positions`. A new row that names none of them is a `422`.
+
+        **Only today's checklists.** A new key's `date_start` is today in its `timezone`. The
+        lists in the product file a checklist by the UTC date it was created on, so send a day's
+        checklists while that date is also the date in UTC, or they show under another day.
+
+        **The "new checklist" push** goes out at `time_notify`, else at `time_start`, today — at
+        once when neither is set, and not at all once that time has passed. It reaches the people
+        in a named audience, plus `users` and `author_id`.
+
+        **Create only, so `exists` means nothing was applied.** A key already on file answers
+        `exists` with its id, whatever the row sent now says, so a resend after a timeout is
+        safe. A checklist nobody has touched yet is changed by deleting it and creating it again;
+        a missed one is rescheduled under a new `external_id`.
+
+        A new key's ids are checked against your company, and the flags left out stay off. The
+        answer lists every row, in the order sent, as `created` or `exists`.
+        """
+        return cast(
+            ChecklistsCreateResponse,
+            await self._transport.request(
+                "POST",
+                "/company/v3/checklists",
+                json=body,
+            ),
+        )
+
+    async def delete(self, id: int) -> ChecklistsDeleteResponse:
+        """Delete a checklist
+
+        Deletes a checklist nobody has touched, and its discussion.
+
+        **Refused once anybody has worked on it** — 409, `checklist_locked`: it was started or
+        is past due, an item was answered, it or one of its items carries a file (the author's
+        reference files included), or it has an issue or a comment. One with `is_keep_status`
+        never turns past due, so it stays deletable after its dates until somebody works on it.
+        The refusal is final; reschedule under a new `external_id` instead. A checklist the web
+        app or a template issued with files therefore cannot be deleted here.
+
+        A `404` on a repeated delete means it is gone. The id comes from the create answer or
+        from `GET /company/v3/checklists?external_ids=`. A deletion is not visible to polling
+        with `updated_since`.
+        """
+        return cast(
+            ChecklistsDeleteResponse,
+            await self._transport.request(
+                "DELETE",
+                f"/company/v3/checklists/{id}",
+            ),
+        )
+
+    async def get(self, id: int, *, include: list[ChecklistsInclude] | None = None) -> ChecklistsGetResponse:
+        """Read one checklist
+
+        The same keys the listing answers with, and the same `include` vocabulary. Another company's id is a `404`.
+        """
+        return cast(
+            ChecklistsGetResponse,
+            await self._transport.request(
+                "GET",
+                f"/company/v3/checklists/{id}",
+                query={"include": include},
+            ),
+        )
+
+    async def list(self, *, per_page: int | None = None, cursor: str | None = None, external_ids: list[str] | None = None, statuses: list[ChecklistsStatus] | None = None, types: list[ChecklistsType] | None = None, templates: list[int] | None = None, locations: list[int] | None = None, start_from: str | None = None, start_to: str | None = None, updated_since: str | None = None, search: str | None = None, include: list[ChecklistsInclude] | None = None) -> ChecklistsListResponse:
+        """List checklists
+
+        Checklists as we hold them, oldest first, paged on a cursor: what was issued, how far it
+        got, and what was answered.
+
+        **One checklist is one row shared by everyone it is aimed at.** Whoever fills it in
+        answers for all of them: its author, its `users`, or anyone at its `locations`,
+        `departments` or `positions`. `user_filters` narrows who sees it but lets nobody fill it
+        in. A result per location needs a checklist per location.
+
+        `include=items` adds the questions with their answers. **An item's `value` follows its
+        `type`**: `checkbox` and `boolean` answer a boolean, `option` one of `bad`, `normal` or
+        `good`, `number` an integer, `comment` a string. It is null until somebody answers.
+
+        `score_percent` is what the answered items scored, weighted by their `score`. A
+        handed-in checklist below `min_score`, or with any item left unticked, is `incompleted`;
+        an open required item refuses the hand-in. With `req_approve` it goes to `pending`, and
+        the same rule settles it once approved.
+
+        `locations` matches a checklist aimed at one of those locations; one aimed at every
+        location (empty `locations`) is not matched. `start_from` and `start_to` are on
+        `date_start`, and a checklist without one is not matched.
+
+        **`updated_since` sees the work**: an answer, a file added to or removed from the
+        checklist or one of its items, an approver's decision and an issue resolved from its task
+        all move `updated_at`. A comment does not, and neither does a template or a person
+        deleted for good, which empties `template_id`, `author_id` or an item's `user`, or drops
+        the person from `managers` and `users`. A deleted checklist is simply no longer listed,
+        so polling cannot see a deletion.
+        """
+        return cast(
+            ChecklistsListResponse,
+            await self._transport.request(
+                "GET",
+                "/company/v3/checklists",
+                query={"per_page": per_page, "cursor": cursor, "external_ids": external_ids, "statuses": statuses, "types": types, "templates": templates, "locations": locations, "start_from": start_from, "start_to": start_to, "updated_since": updated_since, "search": search, "include": include},
             ),
         )
 
@@ -2538,6 +2779,7 @@ class _AsyncClocksterApi(_AsyncNamespace):
     def __init__(self, transport: _AsyncTransport) -> None:
         super().__init__(transport)
         self.attendance = AsyncAttendance(transport)
+        self.checklists = AsyncChecklists(transport)
         self.departments = AsyncDepartments(transport)
         self.documents = AsyncDocuments(transport)
         self.files = AsyncFiles(transport)
