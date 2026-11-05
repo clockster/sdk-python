@@ -322,7 +322,7 @@ UsersStatus = Literal["active", "dismissed", "all"]
 
 WebhooksDeliveriesInclude = Literal["payload"]
 
-WebhooksEvent = Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.deleted"]
+WebhooksEvent = Literal["user.created", "user.updated", "user.deleted", "user.restored", "user.purged", "location.created", "location.updated", "location.deleted", "department.created", "department.updated", "department.deleted", "position.created", "position.updated", "position.deleted", "task.created", "task.completed", "task.approved", "task.rejected", "task.reopened", "task.deleted"]
 
 class WorkSchedule(TypedDict):
     # Which kind of day this is, and with it what else the item requires.
